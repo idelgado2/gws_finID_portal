@@ -67,9 +67,8 @@ shinyApp(ui = fluidPage(
                 multiple = FALSE,
                 accept = c("image/jpeg", "image/png", "image/tiff",
                            ".jpeg", ".jpg", ".png", ".tiff")),
-      
-      selectInput("sex", "Sex (Select U if unknown/not observed)", choices = c("M", "F", "U"), 
-                  selectize = F, input = "U"), 
+      selectInput("sex", "Sex (U if unknown)", choices = c("M", "F", "U"), 
+                  selectize = F, selected = "U"), 
       sliderInput("size", "Size (in ft)", value = 13.0, min = 4, max = 20, step = 0.5),
       textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", 
                 width = "600px"),
