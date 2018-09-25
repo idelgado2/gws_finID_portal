@@ -1,19 +1,9 @@
 library(shiny)
 library(rsconnect)
 library(DT)
+source("fin_shiny_fxns.R")
 #mostly here: https://deanattali.com/2015/06/14/mimicking-google-form-shiny/
 #upload support: https://shiny.rstudio.com/articles/upload.html
-
-# #set mandatory, does not work right now
-# fieldsMandatory <- c("observer", "site", "date", "sighting", "fin.photo")
-# labelMandatory <- function(label){
-#   tagList(
-#     label,
-#     span("*", class = "mandatory_star")
-#   )
-# }
-# appCSS <-
-#   ".mandatory_star { color: red; }"
 
 
 #saving data
@@ -21,32 +11,10 @@ library(DT)
 # fieldsAll <- c("site", "date", "sighting", #"fin.photo", 
 #                "sex", "size", "tag.exists", 
 #                "tagdeployed", "tag.id", "tag.notes", "biopsy", "observer", "notes")
-responseDir <- file.path("entries")
-#time functions
-epochTime <- function(){
-  as.integer(Sys.time())
-}
-humanTime <- function() format(Sys.time(), "%Y%m%d-%H%M%OS")
-#save fxn
-#saving
-saveData <- function(data){
-  fileName <- sprintf("here_lies_data.csv")
-  write.csv(x = data, file=file.path(responseDir, fileName),
-            row.names = F, quote = T)
-}
-savePhoto <- function(photo){
-  png("/Users/jmoxley/Downloads/here_lies_photo.png")
-  fileName <- sprintf("here_lies_photo.png")
-  file.copy(photo, "/Users/jmoxley/Downloads/here_lies_photo.png")
-  dev.off()
-}
-loadData <- function() {
-  files <- list.files(file.path(responseDir), full.names = TRUE)
-  data <- lapply(files, read.csv, stringsAsFactors = FALSE)
-  data <- dplyr::rbind_all(data)
-  data
-}
 
+#define where to find things
+responseDir <- file.path("entries")
+fileName = "here_lies_data.csv"
 shinyApp(ui = fluidPage(
   #shinyjs::useShinyjs(),
   #shinyjs::inlineCSS(appCSS),
@@ -60,14 +28,23 @@ shinyApp(ui = fluidPage(
       checkboxGroupInput("observer", "Observer", choices = c("PK", "SA", "SJ", "JM", "TW", "TC", "EM"), 
                          inline = T), #can select multiple
       #fileupload here
+      textInput("daynotes", "Survey notes", placeholder = "e.g. notes about the survey todayc", 
+                width = "600px"),
       selectInput("site", "Monitoring Site", choices = c("PR", "FAR", "AN", "APT")),
       dateInput("date", "Date", value = Sys.Date(), format = "yyyy-mm-dd"),
       textInput("sighting", "Sighting #", placeholder = "0?"), #MAKE THIS NUMERIC?
+      textInput("matchnotes", "Match notes?", placeholder = "handle, tag #?", 
+                width = "600px"),
+      textInput("time", "Time of Sighting", placeholder = "0900"), #MAKE THIS NUMERIC   d?
       fileInput("fin.photo", "Upload Fin Photo here",
                 multiple = FALSE,
                 accept = c("image/jpeg", "image/png", "image/tiff",
                            ".jpeg", ".jpg", ".png", ".tiff")),
+<<<<<<< HEAD
       selectInput("sex", "Sex (U if unknown)", choices = c("M", "F", "U"), 
+=======
+      selectInput("sex", label = "Sex (U if unknown)", choices = c("M", "F", "U"), 
+>>>>>>> d1b81aa40b2af4e6c1dce59c5e7d74a2a58d2ea2
                   selectize = F, selected = "U"), 
       sliderInput("size", "Size (in ft)", value = 13.0, min = 4, max = 20, step = 0.5),
       textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", 
@@ -77,53 +54,53 @@ shinyApp(ui = fluidPage(
       #make ^ check box and conditional panel for each tag selected?
       conditionalPanel(
         condition = "input.tagdeployed != 'None'",
+        checkboxGroupInput("tag.side", "Deployed On? ", choices = c("L", "R"), 
+                           inline = T), #can select multiple
         textInput("tag.id", "Tag ID#"),
         textInput("tag.notes", "Tagging Notes", width = '600px', 
                   placeholder = "e.g., programming params, Ptt/SPOT used, orientation"),
         selectInput("biopsy", "Biopsy?", choices = c("N", "Y"))
       ),
 
-      actionButton("masfins", "More Fins?", class="btn-primary"),
+      actionButton("masfins", "Mas Fins?", class="btn-primary"),
       actionButton("submit", "Submit", class = "btn-primary")
     ),
     mainPanel(
       textOutput("PhotoID"),
-      imageOutput(outputId = "FinShot")
+      imageOutput(outputId = "FinShot"),
+      DT::dataTableOutput("responsesTable")
     )
-  ),
-  div(id = "form"),
-  shinyjs::hidden(
-    div(
-      id = "submit_msg",
-      h3("New Fin Photo captured!"),
-      actionLink("submit_another", "Submit data")
-    )
-  )  
+  )#,
+  # div(id = "form"),
+  # shinyjs::hidden(
+  #   div(
+  #     id = "submit_msg",
+  #     h3("New Fin Photo captured!"),
+  #     actionLink("submit_another", "Submit data")
+  #   )
+  # )  
 ),
 server = function(input, output, session) {
   re1 <- reactive({gsub("\\\\","/", input$fin.photo$datapath)})
+  #make photoID stamp
   output$PhotoID <- renderText({paste0(toupper(input$site), 
                                        format(input$date, "%y%m%d"), 
                                        sprintf("%02s", input$sighting))})
+  #render the fin
   output$FinShot <- renderImage({list(src = re1())})
+  #render the data
+  output$responsesTable <- DT::renderDataTable(
+    loadData(),
+    rownames = FALSE,
+    options = list(searching = FALSE, lengthChange = FALSE)
+  )
   
-  
-  # #build a table of the data
-  # output$responsesTable <- DT::renderDataTable(
-  #   loadData(),
-  #   rownames = FALSE,
-  #   options = list(searching = FALSE, lengthChange = FALSE)
-  # ) 
-  
-  
-  
-
-  formPhoto <- function(fin)({
-    #plotPNG at least creates a file
-    photo <- plotPNG(renderImage(fin$datapath),
-                     filename = "/Users/jmoxley/Downloads/here_lies_photo.png")
-    photo
-  })
+  # formPhoto <- function(fin)({
+  #   #plotPNG at least creates a file
+  #   photo <- plotPNG(renderImage(fin$datapath),
+  #                    filename = "/Users/jmoxley/Downloads/here_lies_photo.png")
+  #   photo
+  #   })
   #make data entry row
   formData <- reactive({
     #save photo
@@ -142,7 +119,7 @@ server = function(input, output, session) {
   
   # action to take when submit button is pressed
   observeEvent(input$submit, {
-    savePhoto(formPhoto(input$fin.photo))
+    #savePhoto(formPhoto(input$fin.photo))
     saveData(formData())
     shinyjs::reset("form")
     shinyjs::hide("form")
