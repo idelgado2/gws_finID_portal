@@ -1,0 +1,13 @@
+name: Shiny
+title: Shiny
+username:
+account: jaymox
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 467282
+bundleId: 1603180
+url: https://jaymox.shinyapps.io/Shiny/
+when: 1537823543.70517
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app2.R|entry_app_dev.R
