@@ -7,6 +7,7 @@ source("fin_shiny_fxns2.R")
 responseDir <- file.path("entries")
 fileName = "here_lies_data.csv"
 shinyApp(ui = navbarPage(
+  id = "form",
   title = "FinID Data Entry",
   
   ###############
@@ -15,15 +16,17 @@ shinyApp(ui = navbarPage(
   tabPanel("Survey Info",
            sidebarPanel(
              #Survey inputs
-             id = "form", 
              checkboxGroupInput("crew", "Crew", 
                                 choices = flds$observers, inline = T),
-             selectInput("survey", "Monitoring Loc",
-                         choices = flds$sites),
              textInput("vessel", "Vessel platform", placeholder = "Kingfisher? BS?"),
-             ###MAKE THIS THE X/Y BIT
+             hr(),
+             selectInput("survey", "Survey Location",
+                         choices = flds$sites),
              dateInput("date.survey", "Date", 
                        value = Sys.Date(), format = "yyyy-mm-dd")
+             ###MAKE THIS THE X/Y BIT
+             ###sal wants xy bit in the fin ID
+             
              ),
            mainPanel(
              #outputs for tab 1
@@ -44,88 +47,204 @@ shinyApp(ui = navbarPage(
   tabPanel("Fin Photo Entry",
            sidebarPanel(
              #file upload
-             radioButtons("observer", "Observer", 
+             radioButtons("user", "User", 
                                 choices = flds$observers, inline = T),
+             #PhotoID fields first
+             selectInput("site.phid", "Monitoring Site", selected = uiOutput("site.survey"),
+                         choices = flds$sites),
+             dateInput("date.phid", "Date", value = NULL, format = "yyyy-mm-dd"),
+             numericInput("sighting.phid", "Sighting #", value = NULL, 
+                          min = 01, max = 99, step =1), #MAKE THIS NUMERIC?
+             hr(),
              fileInput("fin.photo", "Upload fin here", 
                        multiple = F, accept=c("image/jpeg", "image/png", "image/tiff",
                                               ".jpeg", ".jpg", ".png", ".tiff")),
-             #PhotoID fields
-             #lapply(entries, FUN = qMaker), #deprecated cannot mimic shinyforms yet
-             hr(),
-             selectInput("site.phid", "Monitoring Site", choices = c("PR", "FAR", "AN", "APT")),
-             dateInput("date.phid", "Date", value = Sys.Date(), format = "yyyy-mm-dd"),
-             numericInput("sighting.phid", "Sighting #", value = NULL, min = 01, max = 99, step =), #MAKE THIS NUMERIC?
-             
              hr(), #break in UI
-             selectInput("sex", "Sex (U if unknown)", choices = c("M", "F", "U"), 
-                         selectize = F, selected = "U"), 
-             sliderInput("size", "Size (in ft)", value = 13.0, min = 4, max = 20, step = 0.5),
-             textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", 
-                       width = "600px"),
-             selectInput("tag.exists", "Tagged Already?", choices = c("U", "Y"), selected = "U"),
-             selectInput("tagdeployed", "New Tag?", choices = c("None", "PAT", "Acoustic", "Stomach", "Clamp"), selected = "None"),
-             #make ^ check box and conditional panel for each tag selected?
-             conditionalPanel(
-               condition = "input.tagdeployed != 'None'",
-               radioButtons("tag.side", "Deployed On? ", choices = c("L", "R"), 
-                                  inline = T), 
-               textInput("tag.id", "Tag ID#"),
-               textInput("tag.notes", "Tagging Notes", width = '600px', 
-                         placeholder = "e.g., programming params, Ptt/SPOT used, orientation"),
-               selectInput("biopsy", "Biopsy?", choices = c("N", "Y"), selected="N"),
-               conditionalPanel(
-                 condition = "input.biospy != 'N'",
-                 textInput("biopsyID", "Vial Number?")
-               )
+             conditionalPanel(   #collect data once fin is uploaded & photoID is crorect       
+                 condition = "output.finuploaded",
+                 selectInput("sex", "Sex (U if unknown)", choices = c("M", "F", "U"), 
+                             selectize = F, selected = "U"), 
+                 sliderInput("size", "Size (in ft)", value = 12.75, min = 4, max = 20, step = 0.5),
+                 textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", 
+                           width = "600px"),
+                 selectInput("tag.exists", "Tagged Already?", choices = c("U", "Y"), selected = "U"),
+                 selectInput("tagdeployed", "New Tag?", choices = c("None", "PAT", "Acoustic", "Stomach", "Clamp"), selected = "None"),
+                 #make ^ check box and conditional panel for each tag selected?
+                 conditionalPanel(
+                   condition = "input.tagdeployed != 'None'",
+                   radioButtons("tag.side", "Deployed On? ", choices = c("NA", "L", "R"), 
+                                      inline = T), 
+                   textInput("tag.id", "Tag ID#"),
+                   textInput("tag.notes", "Tagging Notes", width = '600px', 
+                             placeholder = "e.g., programming params, Ptt/SPOT used, orientation"),
+                   selectInput("biopsy", "Biopsy?", choices = c("N", "Y"), selected="N"),
+                   conditionalPanel(
+                     condition = "input.biospy != 'N'",
+                     textInput("biopsyID", "Vial Number?")
+                   )
+                 )
              )
              
              
            ), 
-           mainPanel(
+           mainPanel(useShinyjs(),
              textOutput("PhotoID"),
              imageOutput(outputId = "FinShot"),
              hr(),
              textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", 
                        width = "600px"),
-             textInput("time", "Time of Sighting", placeholder = "24hr CLOCK PLS (e.g., 0915 for 9:15")
+             textInput("time", "Time of Observation", placeholder = "24HR CLOCK PLS (e.g., 0915 for 9:15"),
+             hr(),
+             conditionalPanel("output.finuploaded",
+               DT::dataTableOutput("dataentry"),
+               actionButton("masfins", "Mas Fins?", class="btn-primary"),
+               actionButton("r2submit", "Ready To Submit?", class="btn-primary")
+               #submit button that tabs to next panel?
+             )
            )
   ),
   tabPanel("Data Submission",
            fluidPage(
-             #display data
-             DT::dataTableOutput("responsesTable"),
              checkboxInput("reviewed", 
-                           label = "I have reviewed this data and certify my wish to submit it", 
-                           value = F)
-           )
+                           label = "I HAVE VERIFIED THE DATA", 
+                           value = F),
+             #display data
+             DT::dataTableOutput("finsTable"),
+             
+             #reveal button if data is reviewed
+             uiOutput("reviewed")
+        )
   )
 ),
 server = function(input, output, session) {
-  #Page 1 server stuff
-  output$site.survey <- renderText({input$survey})
-  output$date.survey <- renderText({format(input$date.survey, "%Y-%m-%d")}) 
-  output$effort.on <- renderText({sprintf("%04s", input$effort.on*100)})
+  ######################
+  ######################
+  ##Page 1 server stuff
+  #update phids from survey
+  observeEvent(input$survey,{
+    updateSelectInput(session, "site.phid", selected = input$survey)
+  }) 
+  observeEvent(input$date.survey,{
+    updateDateInput(session, "date.phid", value = input$date.survey)
+  })
   
   
   ######################
   ######################
-  #Page 2 server stuff
-  #Make Fin & PhotoID appear
-  re1 <- reactive({gsub("\\\\","/", input$fin.photo$datapath)})
-  output$FinShot <- renderImage({list(src = re1())})
-  output$PhotoID <- renderText({paste0(toupper(input$site.phid),
-                                       format(input$date.phid, "%y%m%d"),
-                                       sprintf("%02s", input$sighting.phid))})
+  ##Page 2 server stuff
+  #data gatekeeper, fields can be entered once PhotoID & file exists
+  finUP <- reactive({
+    if(is.null(input$fin.photo)){
+      return(NULL)
+    }else{
+      #make fin photo
+      re1 <- reactive({gsub("\\\\","/", input$fin.photo$datapath)})
+      output$FinShot <- renderImage({list(src = re1())})
+      #make id
+      output$PhotoID <- renderText({paste0(toupper(input$site.phid),
+                                           format(input$date.phid, "%y%m%d"),
+                                           sprintf("%02s", input$sighting.phid))})
+    }
+  })
+  output$finuploaded <- reactive({
+    return(!is.null(finUP()) && !is.na(input$sighting.phid))
+  })
+  outputOptions(output, 'finuploaded', suspendWhenHidden=F)
   
-  output$date.phid <- renderText({input$date.phid})
   
-  
-  #build data frame
-  output$responsesTable <- DT::renderDataTable(
-    loadData(),
-    rownames = FALSE,
-    options = list(searching = FALSE, lengthChange = FALSE)
+  output$dataentry <- DT::renderDataTable(
+      formData(),
+      rownames = FALSE,
+      options = list(searching = FALSE, lengthChange = FALSE,
+                columnDefs=list(
+                  list(visible = F, targets = c(0:5,14:17))))
   )
+  
+  
+  ######################
+  ######################
+  ##Page 3 server stuff
+  #build data frame, needs to become reactive
+  #output$reviewed <- renderText({input$reviewed})
+  output$reviewed <- renderUI({
+    if(input$reviewed == T){
+      actionButton("SAVEDATA", "SUBMIT & STORE", class="btn-primary")}
+  })
+  
+  # review <- reactive({
+  #   if(output$reviewed==F){return(NULL)}
+  #   else{
+  #     output$reviewCHK <- renderText({input$reviewed})
+  #   }
+  # })
+  # output$reviewed <- return(review())
+
+  ######################
+  ######################
+  ##Data making stuff
+  formData <- reactive({
+    #save photo
+    ###HERE!!!
+    
+    #can make the fields match zegami here? 
+    data <- c(refID = "UNMATCHED", name = "NOMATCH", 
+              PhotoID = paste0(toupper(input$site.phid), 
+                               format(input$date.phid, "%y%m%d"), 
+                               sprintf("%02s", input$sighting.phid)), 
+              site = as.character(input$site.phid), 
+              date = as.character(input$date.phid), 
+              sighting = as.character(sprintf("%02s",input$sighting.phid)),
+              sex = as.character(input$sex),
+              size = as.character(input$size),
+              tag.exists = as.character(input$tag.exists),
+              tag.deployed = as.character(input$tagdeployed),
+              tag.id = as.character(input$tag.id),
+              tag.side = as.character(input$tag.side),
+              biopsy = as.character(input$biopsy),
+              biopsy.id = as.character(input$biopsyID),
+              notes = as.character(input$notes),
+              tagging.notes = as.character(input$tag.notes),
+              user = as.character(input$user),
+              timestamp = epochTime()
+    )
+    data <- t(data)
+    data
+  })
+  
+  
+  ######################
+  ######################
+  ##Button doing stuff
+  
+  #Observe "mas fins" event here
+  #form & store data,
+  #WHERE TO PUT IT TO DIFF FROM SUBMIT BUTTON? 
+  observeEvent(input$masfins, {
+    #savePhoto(formPhoto(input$fin.photo))
+    saveData(formData())
+    #update pg 3 
+    output$finsTable <- DT::renderDataTable(
+      loadData(dd),
+      rownames = FALSE,
+      options = list(searching = FALSE, lengthChange = FALSE)
+    )
+  })
+  
+  
+  ##Somehow do something different 
+  observeEvent(input$r2submit, {
+    #click masfins to save photo/data
+    observe({
+      shinyjs::click("masfins")})
+    #move user to submission page
+    updateTabsetPanel(session, "form", selected = "Data Submission")
+  })
+  
+  ##actions once data can be stored
+  observeEvent(input$SAVEDATA,{
+
+  })
+  
 }
 )
   

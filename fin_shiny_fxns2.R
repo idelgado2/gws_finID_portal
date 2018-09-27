@@ -3,6 +3,7 @@ require(shiny)
 require(rsconnect)
 require(DT)
 require(shinyTime)
+require(shinyjs)
 
 #list of observers available to checkbox
 flds <- list(
@@ -67,8 +68,9 @@ labelMandatory <- function(label) {
 }
 
 #get data
-loadData <- function() {
-  files <- list.files(file.path(responseDir), full.names = TRUE)
+loadData <- function(dir) {
+  #add pattern for unique fN for survey
+  files <- list.files(file.path(dir), full.names = TRUE)
   data <- lapply(files, read.csv, stringsAsFactors = FALSE)
   data <- dplyr::bind_rows(data)
   data
@@ -99,7 +101,10 @@ saveData <- function(dat){
   }
 }
 
-
+#timestamping
+epochTime <- function(){
+  as.integer(Sys.time())
+}
   
 #####
 #RESOURCES
