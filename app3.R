@@ -117,6 +117,9 @@ shinyApp(ui = navbarPage(
   )
 ),
 server = function(input, output, session) {
+  #enlarge maximum upload size 
+  options(shiny.maxRequestSize=30*1024^2)
+  
   ######################
   ######################
   ##Page 1 server stuff
