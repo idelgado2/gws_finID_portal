@@ -11,6 +11,8 @@ flds <- list(
   sites = c("PR", "FAR", "AN", "APT")
 )
 
+##
+#attempt to generalize
 entries <- list(
   #list(id = "site.phid", type = "select", title = "Monitoring Site", choices = flds$sites),
   list(id = "date.phid", type = "date", title = "Date", value = Sys.Date(), format = "yyyy-mm-dd"),
@@ -21,42 +23,6 @@ entries <- list(
   #list(id = "size", type = )
 )
 
-#question maker, based on internal code of formUI in shinyforms
-#https://github.com/daattali/shinyforms/blob/master/R/shinyform.R
-qMaker <-  function(question) {
-  label <- question$title
-  # if (question$id %in% fieldsMandatory) {
-  #   label <- labelMandatory(label)
-  # }
-  
-  if (question$type == "text") {
-    input <- textInput(ns(question$id), NULL, "")
-  } else if (question$type == "numeric") {
-    input <- numericInput(ns(question$id), NULL, 0)
-  } else if (question$type == "checkbox") {
-    input <- checkboxInput(ns(question$id), label, FALSE)
-  } else if(question$type == "date"){
-    input <- dateInput(ns(question$id), NULL, 
-                       format = question$format, value = question$value)
-  } else if(question$type == "select"){
-    input <- selectInput(ns(question$id), NULL, choices = )
-  }
-  
-  div(
-    class = "sf-question",
-    if (question$type != "checkbox") {
-      tags$label(
-        `for` = ns(question$id),
-        class = "sf-input-label",
-        label,
-        if (!is.null(question$hint)) {
-          div(class = "question-hint", question$hint)
-        }
-      )
-    },
-    input
-  )
-}
 
   
   
@@ -100,6 +66,14 @@ saveData <- function(dat){
                 quote = T, append=F, sep = ",")
   }
 }
+#save photo uploads w/ photoID
+savePhoto <- function(photo){
+  png("/Users/jmoxley/Downloads/here_lies_photo.png")
+  fileName <- sprintf("here_lies_photo.png")
+  file.copy(photo, "/Users/jmoxley/Downloads/here_lies_photo.png")
+  dev.off()
+}
+
 
 #timestamping
 epochTime <- function(){
@@ -112,3 +86,4 @@ epochTime <- function(){
 #https://github.com/daattali/shinyforms/blob/master/R/shinyform.R
 #https://github.com/JayMox/shinyforms
 #Multiple user lock out: https://community.rstudio.com/t/persistent-data-storage-in-apps-with-multiple-users/1308
+#reset https://stackoverflow.com/questions/49344468/resetting-fileinput-in-shiny-app

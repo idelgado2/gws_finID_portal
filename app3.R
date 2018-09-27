@@ -1,7 +1,7 @@
-#dev following mtg w/ sal, paul, scot
-#multi panel for survey info & 
-#9/25/18
-#adapting basic app to shinyforms fork
+#Data Entry for GWS Monitoring CentralCA
+#uses multiple panels for survey info, Photo entry, Data Submission
+#JHMoxley, 9/25/18
+#
 source("fin_shiny_fxns2.R")
 
 responseDir <- file.path("entries")
@@ -80,7 +80,7 @@ shinyApp(ui = navbarPage(
                    selectInput("biopsy", "Biopsy?", choices = c("N", "Y"), selected="N"),
                    conditionalPanel(
                      condition = "input.biospy != 'N'",
-                     textInput("biopsyID", "Vial Number?")
+                     textInput("biopsy.id", "Vial Number?")
                    )
                  )
              )
@@ -89,7 +89,7 @@ shinyApp(ui = navbarPage(
            ), 
            mainPanel(useShinyjs(),
              textOutput("PhotoID"),
-             imageOutput(outputId = "FinShot"),
+             imageOutput(outputId = "FinShot", width = "auto", height="auto"),
              hr(),
              textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", 
                        width = "600px"),
@@ -187,8 +187,13 @@ server = function(input, output, session) {
   ##Data making stuff
   formData <- reactive({
     #save photo
-    ###HERE!!!
+    if(is.null(finUP)){
+      return(NULL)
+      ##SOME WARNING DAATA WILL NOT BE SAVED W?O A PHOTO FILE
+      }
+    else{
     
+      
     #can make the fields match zegami here? 
     data <- c(refID = "UNMATCHED", name = "NOMATCH", 
               PhotoID = paste0(toupper(input$site.phid), 
@@ -204,7 +209,7 @@ server = function(input, output, session) {
               tag.id = as.character(input$tag.id),
               tag.side = as.character(input$tag.side),
               biopsy = as.character(input$biopsy),
-              biopsy.id = as.character(input$biopsyID),
+              biopsy.id = as.character(input$biopsy.id),
               notes = as.character(input$notes),
               tagging.notes = as.character(input$tag.notes),
               user = as.character(input$user),
@@ -212,6 +217,7 @@ server = function(input, output, session) {
     )
     data <- t(data)
     data
+    }
   })
   
   
@@ -231,6 +237,14 @@ server = function(input, output, session) {
       rownames = FALSE,
       options = list(searching = FALSE, lengthChange = FALSE)
     )
+    
+    #reset fields
+    sapply(c("sighting", "sex", "size", "tag.exists", "tagdeployed", "tag.id",
+             "tag.side", "biopsy", "biopsy.id", "notes", "tag.notes",
+             "fin.photo", "PhotoID", "finuploaded", "match.sugg", "time", "FinShot"), 
+           reset)
+    reset("data")
+    
   })
   
   
@@ -250,4 +264,4 @@ server = function(input, output, session) {
   
 }
 )
-  
+shinyApp(ui, server)
