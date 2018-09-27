@@ -1,5 +1,8 @@
 #functions to support r shiny
+#built with significant roots in shinyforms, https://github.com/daattali/shinyforms
+#forked here: https://github.com/JayMox/shinyforms
 #JHMoxley, 
+
 
 epochTime <- function(){
   as.integer(Sys.time())
@@ -7,9 +10,9 @@ epochTime <- function(){
 humanTime <- function() format(Sys.time(), "%Y%m%d-%H%M%OS")
 #save fxn
 #saving
-saveData <- function(data){
+saveData <- function(dat){
   fileName <- sprintf("here_lies_data.csv")
-  write.table(x = data, file=file.path(responseDir, fileName),
+  write.table(x = data, file=file.path(dd, fN),
             row.names = F, quote = T, append=T, sep = ",")
 }
 
