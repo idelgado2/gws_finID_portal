@@ -3,9 +3,15 @@
 #JHMoxley, 9/25/18
 #
 source("fin_shiny_fxns2.R")
+#set up dropbox
+token <- readRDS("droptoken.rds")
+drop_acc(dtoken=token)
+#set up acct
+#Sys.setlocale(locale="en_US.UTF-8")
 
-responseDir <- file.path("entries")
-fileName = "here_lies_data.csv"
+
+# dd <- file.path("entries")
+# fN = "here_lies_data.csv"
 shinyApp(ui = navbarPage(
   id = "form",
   title = "FinID Data Entry",
@@ -18,7 +24,7 @@ shinyApp(ui = navbarPage(
              #Survey inputs
              checkboxGroupInput("crew", "Crew", 
                                 choices = flds$observers, inline = T),
-             textInput("vessel", "Vessel platform", placeholder = "Kingfisher? BS?"),
+             textInput("vessel", "Vessel platform", placeholder = "Kingfisher Skiff? R/V BS?"),
              hr(),
              selectInput("survey", "Survey Location",
                          choices = flds$sites),
@@ -103,6 +109,9 @@ shinyApp(ui = navbarPage(
              )
            )
   ),
+  ################
+  ##DATA SUBMISSION##
+  ################
   tabPanel("Data Submission",
            fluidPage(
              checkboxInput("reviewed", 
@@ -116,6 +125,9 @@ shinyApp(ui = navbarPage(
         )
   )
 ),
+################
+##SERVER##
+################
 server = function(input, output, session) {
   #enlarge maximum upload size 
   options(shiny.maxRequestSize=30*1024^2)
@@ -160,7 +172,7 @@ server = function(input, output, session) {
       rownames = FALSE,
       options = list(searching = FALSE, lengthChange = FALSE,
                 columnDefs=list(
-                  list(visible = F, targets = c(0:5,14:17))))
+                  list(visible = F, targets = c(14:17))))
   )
   
   
@@ -213,7 +225,8 @@ server = function(input, output, session) {
               notes = as.character(input$notes),
               tagging.notes = as.character(input$tag.notes),
               user = as.character(input$user),
-              timestamp = epochTime()
+              timestamp = epochTime(), 
+              fN = paste0("CCA_GWSphid_", input$survey, "_", input$date.survey, ".csv")
     )
     data <- t(data)
     data
@@ -226,17 +239,18 @@ server = function(input, output, session) {
   ##Button doing stuff
   
   #Observe "mas fins" event here
-  #form & store data,
+  #make the pathways
+  
   #WHERE TO PUT IT TO DIFF FROM SUBMIT BUTTON? 
   observeEvent(input$masfins, {
     #savePhoto(formPhoto(input$fin.photo))
-    saveData(formData())
+    saveData2(formData())
     #update pg 3 
-    output$finsTable <- DT::renderDataTable(
-      loadData(dd),
-      rownames = FALSE,
-      options = list(searching = FALSE, lengthChange = FALSE)
-    )
+    # output$finsTable <- DT::renderDataTable(
+    #   loadData(dd),
+    #   rownames = FALSE,
+    #   options = list(searching = FALSE, lengthChange = FALSE)
+    # )
     
     #reset fields
     sapply(c("sighting", "sex", "size", "tag.exists", "tagdeployed", "tag.id",
@@ -264,4 +278,4 @@ server = function(input, output, session) {
   
 }
 )
-shinyApp(ui, server)
+#shinyApp(ui, server)

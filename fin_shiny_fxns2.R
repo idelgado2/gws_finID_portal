@@ -4,6 +4,11 @@ require(rsconnect)
 require(DT)
 require(shinyTime)
 require(shinyjs)
+require(rdrop2)
+
+#dirs
+#dropbox spot
+dropdd <- "FinID_curator/archive"
 
 #list of observers available to checkbox
 flds <- list(
@@ -47,7 +52,7 @@ loadData <- function(dir) {
 ############
 ##STORAGE FXNS
 ############
-#write & save data (if no file)
+#write & save data (if no file); LOCALLY
 saveData <- function(dat){
   #fileName <- sprintf("here_lies_data.csv")
   # write.table(x = dat, file=file.path(dd, fN),
@@ -64,6 +69,32 @@ saveData <- function(dat){
     write.table(dat, file = file.path(dd, fN),
                 row.names = F, col.names = T,
                 quote = T, append=F, sep = ",")
+  }
+}
+#using dropbox
+saveData2 <- function(data) {
+  # get positioned
+  data <- data.frame(data, as.is = T)
+  orig.n <- nrow(data)
+  dropPath <- file.path(dropdd, data$fN)
+  tempPath <- file.path(tempdir(),
+                        data$fN)
+  
+  if(drop_exists(dropPath)){
+    #read, append, and upload
+    dropdat <- drop_read_csv(dropPath)
+    data <- rbind(dropdat, data)
+    if(nrow(data) > nrow(dropdata)){
+      #update only if successfully appended data
+      write.csv(data, tempPath, row.names = FALSE, quote = TRUE)
+      }
+    drop_upload(tempPath, path = dropdd, mode = "overwrite")
+  }else{
+    #write temp
+    write.csv(data, tempPath, row.names = FALSE, quote = TRUE)
+    print("i got here")
+    #write if not
+    drop_upload(tempPath, path = dropdd, mode = "add")
   }
 }
 #save photo uploads w/ photoID
@@ -87,3 +118,5 @@ epochTime <- function(){
 #https://github.com/JayMox/shinyforms
 #Multiple user lock out: https://community.rstudio.com/t/persistent-data-storage-in-apps-with-multiple-users/1308
 #reset https://stackoverflow.com/questions/49344468/resetting-fileinput-in-shiny-app
+#https://github.com/karthik/rdrop2#accessing-dropbox-on-shiny-and-remote-servers
+#https://deanattali.com/blog/shiny-persistent-data-storage/
