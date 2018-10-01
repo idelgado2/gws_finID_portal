@@ -123,10 +123,9 @@ savePhoto2 <- function(photo, phid){
   
   #set pathways
   dropPath <- file.path(dropfin, fN)
-  # tempPath <- file.path("/Users/jmoxley/Downloads", 
-  #                       paste0(phid, "_", as.integer(Sys.time()), 
-  #                              ".", tools::file_ext(photo$datapath)))
-  tempPath <- file.path("/Users/jmoxley/Downloads", photo$name)
+  tempPath <- file.path("/Users/jmoxley/Downloads",
+                        paste0(phid, "_", as.integer(Sys.time()),
+                               ".", tools::file_ext(photo$datapath)))
   print(dropPath)
   print(tempPath)
   print(photo)
@@ -134,7 +133,7 @@ savePhoto2 <- function(photo, phid){
   #prep photo
   #write data & upload
   cat("Copying file to:", tempPath ,"\n")
-  file.copy(from = photo$datapath, to = tempPath)
+  file.copy(from = photo$datapath, to = tempPath, overwrite=T)
   #file.copy(inFile$datapath, file.path("/Users/jmoxley/Downloads", inFile$name) )
   print(paste0("the local instance existence is ", file.exists(tempPath)))
   drop_upload(tempPath, dropPath, mode = "add")

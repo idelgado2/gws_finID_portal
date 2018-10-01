@@ -254,8 +254,8 @@ server = function(input, output, session) {
   #WHERE TO PUT IT TO DIFF FROM SUBMIT BUTTON? 
   observeEvent(input$masfins, {
     data <- data.frame(formData(), stringsAsFactors = F)
-    savePhoto2(input$fin.photo, data$PhotoID)
-    saveData2(data)
+    # savePhoto2(input$fin.photo, data$PhotoID)
+    # saveData2(data)
     #update pg 3 
     # output$finsTable <- DT::renderDataTable(
     #   loadData(dd),
