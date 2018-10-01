@@ -9,6 +9,8 @@ require(rdrop2)
 #dirs
 #dropbox spot
 dropdd <- "FinID_curator/archive"
+dropsc <- "FinID_curator/scratch"
+dropfin <- "FinID_curator/FinIDs_staging"
 
 #list of observers available to checkbox
 flds <- list(
@@ -46,6 +48,13 @@ loadData <- function(dir) {
   data <- dplyr::bind_rows(data)
   data
 }
+#dropbox load
+loadData2 <- function(fileName) {
+  print(fileName)
+  #add pattern for unique fN for survey
+  data <- drop_read_csv(file.path(dropsc, fileName))
+  data
+}
 
 
 
@@ -74,35 +83,61 @@ saveData <- function(dat){
 #using dropbox
 saveData2 <- function(data) {
   # get positioned
-  data <- data.frame(data, as.is = T)
+  data <- data.frame(data, as.is = T, stringsAsFactors = F)
   orig.n <- nrow(data)
-  dropPath <- file.path(dropdd, data$fN)
+  dropPath <- file.path(dropsc, data$fN)
   tempPath <- file.path(tempdir(),
                         data$fN)
+  print(paste("storing data in this file", dropPath))
   
   if(drop_exists(dropPath)){
     #read, append, and upload
     dropdat <- drop_read_csv(dropPath)
     data <- rbind(dropdat, data)
-    if(nrow(data) > nrow(dropdata)){
+    if(nrow(data) > nrow(dropdat)){
       #update only if successfully appended data
       write.csv(data, tempPath, row.names = FALSE, quote = TRUE)
       }
-    drop_upload(tempPath, path = dropdd, mode = "overwrite")
+    drop_upload(tempPath, path = dropsc, mode = "overwrite")
   }else{
     #write temp
     write.csv(data, tempPath, row.names = FALSE, quote = TRUE)
-    print("i got here")
     #write if not
-    drop_upload(tempPath, path = dropdd, mode = "add")
+    drop_upload(tempPath, path = dropsc, mode = "add")
   }
 }
+
+
 #save photo uploads w/ photoID
 savePhoto <- function(photo){
   png("/Users/jmoxley/Downloads/here_lies_photo.png")
   fileName <- sprintf("here_lies_photo.png")
   file.copy(photo, "/Users/jmoxley/Downloads/here_lies_photo.png")
   dev.off()
+}
+#dropbox style
+savePhoto2 <- function(photo, phid){
+  fN <- paste(phid, tools::file_ext(photo$datapath), sep=".")
+  print(fN)
+  print(photo$name)
+  
+  #set pathways
+  dropPath <- file.path(dropfin, fN)
+  # tempPath <- file.path("/Users/jmoxley/Downloads", 
+  #                       paste0(phid, "_", as.integer(Sys.time()), 
+  #                              ".", tools::file_ext(photo$datapath)))
+  tempPath <- file.path("/Users/jmoxley/Downloads", photo$name)
+  print(dropPath)
+  print(tempPath)
+  print(photo)
+  
+  #prep photo
+  #write data & upload
+  cat("Copying file to:", tempPath ,"\n")
+  file.copy(from = photo$datapath, to = tempPath)
+  #file.copy(inFile$datapath, file.path("/Users/jmoxley/Downloads", inFile$name) )
+  print(paste0("the local instance existence is ", file.exists(tempPath)))
+  drop_upload(tempPath, dropPath, mode = "add")
 }
 
 

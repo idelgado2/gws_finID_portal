@@ -162,10 +162,10 @@ server = function(input, output, session) {
     }
   })
   output$finuploaded <- reactive({
+    #hide the data entry tbl until essential info is included
     return(!is.null(finUP()) && !is.na(input$sighting.phid))
   })
   outputOptions(output, 'finuploaded', suspendWhenHidden=F)
-  
   
   output$dataentry <- DT::renderDataTable(
       formData(),
@@ -207,11 +207,11 @@ server = function(input, output, session) {
     
       
     #can make the fields match zegami here? 
-    data <- c(refID = "UNMATCHED", name = "NOMATCH", 
+    data <- c(refID = "UNMATCHED", name = "NONE_YET", 
               PhotoID = paste0(toupper(input$site.phid), 
                                format(input$date.phid, "%y%m%d"), 
                                sprintf("%02s", input$sighting.phid)), 
-              site = as.character(input$site.phid), 
+              site = toupper(as.character(input$site.phid)), 
               date = as.character(input$date.phid), 
               sighting = as.character(sprintf("%02s",input$sighting.phid)),
               sex = as.character(input$sex),
@@ -226,12 +226,22 @@ server = function(input, output, session) {
               tagging.notes = as.character(input$tag.notes),
               user = as.character(input$user),
               timestamp = epochTime(), 
-              fN = paste0("CCA_GWSphid_", input$survey, "_", input$date.survey, ".csv")
+              fN = paste0("CCA_GWS_PHID_", 
+                           toupper(input$site.phid),
+                           format(input$date.phid, "%y%m%d"), 
+                           ".csv")
     )
     data <- t(data)
     data
     }
   })
+  
+  # formPhoto <- function(fin)({
+  #   #plotPNG at least creates a file
+  #   photo <- plotPNG(renderImage(fin$datapath),
+  #                    filename = "/Users/jmoxley/Downloads/here_lies_photo.png")
+  #   photo
+  #   })
   
   
   ######################
@@ -243,14 +253,19 @@ server = function(input, output, session) {
   
   #WHERE TO PUT IT TO DIFF FROM SUBMIT BUTTON? 
   observeEvent(input$masfins, {
-    #savePhoto(formPhoto(input$fin.photo))
-    saveData2(formData())
+    data <- data.frame(formData(), stringsAsFactors = F)
+    savePhoto2(input$fin.photo, data$PhotoID)
+    saveData2(data)
     #update pg 3 
     # output$finsTable <- DT::renderDataTable(
     #   loadData(dd),
     #   rownames = FALSE,
     #   options = list(searching = FALSE, lengthChange = FALSE)
     # )
+    output$finsTable <- DT::renderDataTable(
+      loadData2(data$fN),
+      rownames = F, options = list(searching=F, lengthChange=F)
+      )
     
     #reset fields
     sapply(c("sighting", "sex", "size", "tag.exists", "tagdeployed", "tag.id",
