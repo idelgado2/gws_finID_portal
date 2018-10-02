@@ -24,7 +24,7 @@ shinyApp(ui = navbarPage(
              #Survey inputs
              checkboxGroupInput("crew", "Crew", 
                                 choices = flds$observers, inline = T),
-             textInput("vessel", "Vessel platform", placeholder = "Kingfisher Skiff? R/V BS?"),
+             textInput("vessel", "Vessel platform", placeholder = "Kingfisher Skiff? Norcal? R/V BS?"),
              hr(),
              selectInput("survey", "Survey Location",
                          choices = flds$sites),
@@ -41,9 +41,9 @@ shinyApp(ui = navbarPage(
              sliderInput("effort.off", "Off Effort?",
                        value = 15, min = 4, max = 20, step = 0.5),
              textInput("notes.survey", "Notes from survey day", 
-                       placeholder = "breaches? predations?", width = "100%"), 
+                       placeholder = "breaches? predations?", width = "100%"),
+             textOutput("crew")
              
-             textOutput("effort.on")
            )
   ),
   
@@ -70,7 +70,7 @@ shinyApp(ui = navbarPage(
                  condition = "output.finuploaded",
                  selectInput("sex", "Sex (U if unknown)", choices = c("M", "F", "U"), 
                              selectize = F, selected = "U"), 
-                 sliderInput("size", "Size (in ft)", value = 12.75, min = 4, max = 20, step = 0.5),
+                 numericInput("size", "Size (in ft)", value = NULL, min = 4, max = 20, step = 0.5),
                  textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", 
                            width = "600px"),
                  selectInput("tag.exists", "Tagged Already?", choices = c("U", "Y"), selected = "U"),
@@ -143,7 +143,6 @@ server = function(input, output, session) {
     updateDateInput(session, "date.phid", value = input$date.survey)
   })
   
-  
   ######################
   ######################
   ##Page 2 server stuff
@@ -210,6 +209,8 @@ server = function(input, output, session) {
       
     #can make the fields match zegami here? 
     data <- c(refID = "UNMATCHED", name = "NONE_YET", 
+              match.sugg = as.character(input$match.sugg), 
+              time.obs = as.character(input$time),
               # PhotoID = paste0(toupper(input$site.phid), 
               #                  format(input$date.phid, "%y%m%d"), 
               #                  sprintf("%02s", input$sighting.phid)), 
@@ -222,7 +223,7 @@ server = function(input, output, session) {
               date = as.character(input$date.phid), 
               sighting = as.character(input$sighting.phid),
               sex = as.character(input$sex),
-              size = as.character(input$size),
+              size = as.character(round(input$size/0.5)*0.5),
               tag.exists = as.character(input$tag.exists),
               tag.deployed = as.character(input$tagdeployed),
               tag.id = as.character(input$tag.id),
@@ -233,10 +234,21 @@ server = function(input, output, session) {
               tagging.notes = as.character(input$tag.notes),
               user = as.character(input$user),
               timestamp = epochTime(), 
+              #one row, one entry, one photo
               fN = paste0("CCA_GWS_PHID_", 
+                          #photoID
                            toupper(input$site.phid),
                            format(input$date.phid, "%y%m%d"), 
-                           ".csv")
+                           ifelse(nchar(input$sighting.phid==1), 
+                                 paste0("0", input$sighting.phid),
+                                 input$sighting.phid), "_",
+                          #timestamp
+                           as.integer(Sys.time()),
+                           ".csv"),
+              survey.crew = as.character(paste(input$crew, collapse = "|")),
+              survey.effortON = as.character(input$effort.on),
+              survey.effortOFF = as.character(input$effort.off),
+              survey.notes = as.character(input$survey.notes)
     )
     data <- t(data)
     data

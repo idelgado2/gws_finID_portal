@@ -49,10 +49,11 @@ loadData <- function(dir) {
   data
 }
 #dropbox load
-loadData2 <- function(fileName) {
-  print(fileName)
+loadData2 <- function(fileName, dir) {
+  key <- grepl()
   #add pattern for unique fN for survey
-  data <- drop_read_csv(file.path(dropsc, fileName))
+  files <- as.character(drop_dir(dropsc)$path_display)
+  data <- rbind(sapply(files, drop_read_csv))
   data
 }
 
@@ -80,31 +81,33 @@ saveData <- function(dat){
                 quote = T, append=F, sep = ",")
   }
 }
-#using dropbox
+#using dropbox, individual files for entries
 saveData2 <- function(data) {
   # get positioned
   data <- data.frame(data, stringsAsFactors = F)
-  orig.n <- nrow(data)
   dropPath <- file.path(dropsc, data$fN)
   tempPath <- file.path(tempdir(),
                         data$fN)
   print(paste("storing data in this file", dropPath))
   
-  if(drop_exists(dropPath)){
-    #read, append, and upload
-    dropdat <- drop_read_csv(dropPath)
-    data <- rbind(dropdat, data)
-    if(nrow(data) > nrow(dropdat)){
-      #update only if successfully appended data
-      write.csv(data, tempPath, row.names = FALSE, quote = TRUE)
-      }
-    drop_upload(tempPath, path = dropsc, mode = "overwrite")
-  }else{
-    #write temp
-    write.csv(data, tempPath, row.names = FALSE, quote = TRUE)
-    #write if not
-    drop_upload(tempPath, path = dropsc, mode = "add")
-  }
+  write.csv(data, tempPath, row.names = F, quote = TRUE)
+  drop_upload(tempPath, path = dropsc, mode = "add")
+  #deprecated from appending/writing data
+  # if(drop_exists(dropPath)){
+  #   #read, append, and upload
+  #   dropdat <- drop_read_csv(dropPath)
+  #   data <- rbind(dropdat, data)
+  #   if(nrow(data) > nrow(dropdat)){
+  #     #update only if successfully appended data
+  #     write.csv(data, tempPath, row.names = FALSE, quote = TRUE)
+  #     }
+  #   drop_upload(tempPath, path = dropsc, mode = "overwrite")
+  # }else{
+  #   #write temp
+  #   write.csv(data, tempPath, row.names = FALSE, quote = TRUE)
+  #   #write if not
+  #   drop_upload(tempPath, path = dropsc, mode = "add")
+  # }
 }
 
 
