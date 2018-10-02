@@ -83,7 +83,7 @@ saveData <- function(dat){
 #using dropbox
 saveData2 <- function(data) {
   # get positioned
-  data <- data.frame(data, as.is = T, stringsAsFactors = F)
+  data <- data.frame(data, stringsAsFactors = F)
   orig.n <- nrow(data)
   dropPath <- file.path(dropsc, data$fN)
   tempPath <- file.path(tempdir(),
@@ -128,15 +128,15 @@ savePhoto2 <- function(photo, phid){
                                ".", tools::file_ext(photo$datapath)))
   print(dropPath)
   print(tempPath)
-  print(photo)
-  
+  print(class(photo))
+  print(paste0("datapath is ", file.exists(photo$datapath)))
   #prep photo
   #write data & upload
   cat("Copying file to:", tempPath ,"\n")
-  file.copy(from = photo$datapath, to = tempPath, overwrite=T)
+  file.copy(from = photo$datapath, to = tempPath)
   #file.copy(inFile$datapath, file.path("/Users/jmoxley/Downloads", inFile$name) )
   print(paste0("the local instance existence is ", file.exists(tempPath)))
-  drop_upload(tempPath, dropPath, mode = "add")
+  #drop_upload(tempPath, dropPath, mode = "add")
 }
 
 

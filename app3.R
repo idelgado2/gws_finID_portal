@@ -158,7 +158,9 @@ server = function(input, output, session) {
       #make id
       output$PhotoID <- renderText({paste0(toupper(input$site.phid),
                                            format(input$date.phid, "%y%m%d"),
-                                           sprintf("%02s", input$sighting.phid))})
+                                           ifelse(nchar(input$sighting.phid==1), 
+                                                  paste0("0", input$sighting.phid),
+                                                  input$sighting.phid)))})
     }
   })
   output$finuploaded <- reactive({
@@ -208,12 +210,17 @@ server = function(input, output, session) {
       
     #can make the fields match zegami here? 
     data <- c(refID = "UNMATCHED", name = "NONE_YET", 
+              # PhotoID = paste0(toupper(input$site.phid), 
+              #                  format(input$date.phid, "%y%m%d"), 
+              #                  sprintf("%02s", input$sighting.phid)), 
               PhotoID = paste0(toupper(input$site.phid), 
                                format(input$date.phid, "%y%m%d"), 
-                               sprintf("%02s", input$sighting.phid)), 
+                               ifelse(nchar(input$sighting.phid==1), 
+                                      paste0("0", input$sighting.phid),
+                                      input$sighting.phid)), 
               site = toupper(as.character(input$site.phid)), 
               date = as.character(input$date.phid), 
-              sighting = as.character(sprintf("%02s",input$sighting.phid)),
+              sighting = as.character(input$sighting.phid),
               sex = as.character(input$sex),
               size = as.character(input$size),
               tag.exists = as.character(input$tag.exists),
@@ -236,13 +243,16 @@ server = function(input, output, session) {
     }
   })
   
-  # formPhoto <- function(fin)({
-  #   #plotPNG at least creates a file
-  #   photo <- plotPNG(renderImage(fin$datapath),
-  #                    filename = "/Users/jmoxley/Downloads/here_lies_photo.png")
-  #   photo
-  #   })
   
+  savePhoto <- reactive({
+    #save photo
+    if(is.null(finUP)){
+      return(NULL)
+      ##SOME WARNING DAATA WILL NOT BE SAVED W?O A PHOTO FILE
+    }
+    else{
+     #somehow save photo in here??   
+    }
   
   ######################
   ######################
@@ -254,8 +264,8 @@ server = function(input, output, session) {
   #WHERE TO PUT IT TO DIFF FROM SUBMIT BUTTON? 
   observeEvent(input$masfins, {
     data <- data.frame(formData(), stringsAsFactors = F)
-    # savePhoto2(input$fin.photo, data$PhotoID)
-    # saveData2(data)
+    savePhoto2(input$fin.photo, data$PhotoID)
+    saveData2(data)
     #update pg 3 
     # output$finsTable <- DT::renderDataTable(
     #   loadData(dd),
