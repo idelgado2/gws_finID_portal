@@ -160,7 +160,7 @@ server = function(input, output, session) {
                                            format(input$date.phid, "%y%m%d"),
                                            ifelse(nchar(input$sighting.phid==1), 
                                                   paste0("0", input$sighting.phid),
-                                                  input$sighting.phid)))})
+                                                  input$sighting.phid))})
     }
   })
   output$finuploaded <- reactive({
@@ -253,6 +253,7 @@ server = function(input, output, session) {
     else{
      #somehow save photo in here??   
     }
+  })
   
   ######################
   ######################
@@ -264,7 +265,7 @@ server = function(input, output, session) {
   #WHERE TO PUT IT TO DIFF FROM SUBMIT BUTTON? 
   observeEvent(input$masfins, {
     data <- data.frame(formData(), stringsAsFactors = F)
-    savePhoto2(input$fin.photo, data$PhotoID)
+    #savePhoto2(input$fin.photo, data$PhotoID)
     saveData2(data)
     #update pg 3 
     # output$finsTable <- DT::renderDataTable(
