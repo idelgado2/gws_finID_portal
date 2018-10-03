@@ -158,18 +158,12 @@ server = function(input, output, session) {
       re1 <- reactive({gsub("\\\\","/", input$fin.photo$datapath)})
       output$FinShot <- renderImage({list(src = re1())}, deleteFile = FALSE)
       #make id
-      reactiveValues({phid <- paste0(toupper(input$site.phid),
-                                    format(input$date.phid, "%y%m%d"),
-                                    ifelse(nchar(input$sighting.phid==1), 
-                                        paste0("0", input$sighting.phid),
-                                        input$sighting.phid))})
+      output$PhotoID <- renderText({paste0(toupper(input$site.phid),
+                                           format(input$date.phid, "%y%m%d"),
+                                           ifelse(nchar(input$sighting.phid==1),
+                                                  paste0("0", input$sighting.phid),
+                                                  input$sighting.phid))})
       
-      # output$PhotoID <- renderText({paste0(toupper(input$site.phid),
-      #                                      format(input$date.phid, "%y%m%d"),
-      #                                      ifelse(nchar(input$sighting.phid==1), 
-      #                                             paste0("0", input$sighting.phid),
-      #                                             input$sighting.phid))})
-      output$PhotoID <- renderText(phid)
       
     }
   })
