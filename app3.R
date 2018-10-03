@@ -94,6 +94,7 @@ shinyApp(ui = navbarPage(
              
            ), 
            mainPanel(useShinyjs(),
+             textOutput("dp"),
              textOutput("PhotoID"),
              imageOutput(outputId = "FinShot", width = "auto", height="auto"),
              hr(),
@@ -146,20 +147,30 @@ server = function(input, output, session) {
   ######################
   ######################
   ##Page 2 server stuff
+  
   #data gatekeeper, fields can be entered once PhotoID & file exists
   finUP <- reactive({
     if(is.null(input$fin.photo)){
       return(NULL)
     }else{
       #make fin photo
+      cat("the datapath currently is", file.exists(input$fin.photo$datapath), "\n")
       re1 <- reactive({gsub("\\\\","/", input$fin.photo$datapath)})
-      output$FinShot <- renderImage({list(src = re1())})
+      output$FinShot <- renderImage({list(src = re1())}, deleteFile = FALSE)
       #make id
-      output$PhotoID <- renderText({paste0(toupper(input$site.phid),
-                                           format(input$date.phid, "%y%m%d"),
-                                           ifelse(nchar(input$sighting.phid==1), 
-                                                  paste0("0", input$sighting.phid),
-                                                  input$sighting.phid))})
+      reactiveValues({phid <- paste0(toupper(input$site.phid),
+                                    format(input$date.phid, "%y%m%d"),
+                                    ifelse(nchar(input$sighting.phid==1), 
+                                        paste0("0", input$sighting.phid),
+                                        input$sighting.phid))})
+      
+      # output$PhotoID <- renderText({paste0(toupper(input$site.phid),
+      #                                      format(input$date.phid, "%y%m%d"),
+      #                                      ifelse(nchar(input$sighting.phid==1), 
+      #                                             paste0("0", input$sighting.phid),
+      #                                             input$sighting.phid))})
+      output$PhotoID <- renderText(phid)
+      
     }
   })
   output$finuploaded <- reactive({
@@ -208,17 +219,23 @@ server = function(input, output, session) {
     
       
     #can make the fields match zegami here? 
+    phid <- paste0(toupper(input$site.phid), 
+                      format(input$date.phid, "%y%m%d"), 
+                      ifelse(nchar(input$sighting.phid==1), 
+                             paste0("0", input$sighting.phid),
+                             input$sighting.phid))
     data <- c(refID = "UNMATCHED", name = "NONE_YET", 
               match.sugg = as.character(input$match.sugg), 
               time.obs = as.character(input$time),
               # PhotoID = paste0(toupper(input$site.phid), 
               #                  format(input$date.phid, "%y%m%d"), 
               #                  sprintf("%02s", input$sighting.phid)), 
-              PhotoID = paste0(toupper(input$site.phid), 
-                               format(input$date.phid, "%y%m%d"), 
-                               ifelse(nchar(input$sighting.phid==1), 
-                                      paste0("0", input$sighting.phid),
-                                      input$sighting.phid)), 
+              # PhotoID = paste0(toupper(input$site.phid), 
+              #                  format(input$date.phid, "%y%m%d"), 
+              #                  ifelse(nchar(input$sighting.phid==1), 
+              #                         paste0("0", input$sighting.phid),
+              #                         input$sighting.phid)), 
+              PhotoID = as.character(phid),
               site = toupper(as.character(input$site.phid)), 
               date = as.character(input$date.phid), 
               sighting = as.character(input$sighting.phid),
@@ -235,7 +252,7 @@ server = function(input, output, session) {
               user = as.character(input$user),
               timestamp = epochTime(), 
               #one row, one entry, one photo
-              fN = paste0("CCA_GWS_PHID_", 
+              dfN = paste0("CCA_GWS_PHID_", 
                           #photoID
                            toupper(input$site.phid),
                            format(input$date.phid, "%y%m%d"), 
@@ -245,6 +262,8 @@ server = function(input, output, session) {
                           #timestamp
                            as.integer(Sys.time()),
                            ".csv"),
+              #photo file
+              
               survey.crew = as.character(paste(input$crew, collapse = "|")),
               survey.effortON = as.character(input$effort.on),
               survey.effortOFF = as.character(input$effort.off),
@@ -256,16 +275,16 @@ server = function(input, output, session) {
   })
   
   
-  savePhoto <- reactive({
-    #save photo
-    if(is.null(finUP)){
-      return(NULL)
-      ##SOME WARNING DAATA WILL NOT BE SAVED W?O A PHOTO FILE
-    }
-    else{
-     #somehow save photo in here??   
-    }
-  })
+  # savePhoto <- reactive({
+  #   #save photo
+  #   if(is.null(finUP)){
+  #     return(NULL)
+  #     ##SOME WARNING DAATA WILL NOT BE SAVED W?O A PHOTO FILE
+  #   }
+  #   else{
+  #    cat("the datapath w/in sP() is", file.exists(rv$fin.photo$datapath), "\n")
+  #   }
+  # })
   
   ######################
   ######################
@@ -277,8 +296,22 @@ server = function(input, output, session) {
   #WHERE TO PUT IT TO DIFF FROM SUBMIT BUTTON? 
   observeEvent(input$masfins, {
     data <- data.frame(formData(), stringsAsFactors = F)
-    #savePhoto2(input$fin.photo, data$PhotoID)
     saveData2(data)
+    #savePhoto()
+    savePhoto2(input$fin.photo, data$PhotoID)
+    #save photo
+    # dropPath <- file.path(dropfin, data$fN)
+    # tempPath <- file.path(tempdir(),
+    #                       paste0(data$fN,
+    #                              ".", tools::file_ext(input$fin.photo$datapath)))
+    # print(tempPath)
+    # cat("the datapath is ", file.exists(input$fin.photo$datapath), "\n")
+    # cat("Copying file to:", tempPath ,"\n")
+    # file.copy(from = input$fin.photo$datapath, to = tempPath)
+    # print(paste0("the local instance existence is ", file.exists(tempPath)))
+    # drop_upload(tempPath, dropPath, mode = "add")
+    # 
+    
     #update pg 3 
     # output$finsTable <- DT::renderDataTable(
     #   loadData(dd),

@@ -112,34 +112,26 @@ saveData2 <- function(data) {
 
 
 #save photo uploads w/ photoID
-savePhoto <- function(photo){
-  png("/Users/jmoxley/Downloads/here_lies_photo.png")
-  fileName <- sprintf("here_lies_photo.png")
-  file.copy(photo, "/Users/jmoxley/Downloads/here_lies_photo.png")
-  dev.off()
-}
+# savePhoto <- function(photo){
+#   png("/Users/jmoxley/Downloads/here_lies_photo.png")
+#   fileName <- sprintf("here_lies_photo.png")
+#   file.copy(photo, "/Users/jmoxley/Downloads/here_lies_photo.png")
+#   dev.off()
+# }
 #dropbox style
 savePhoto2 <- function(photo, phid){
-  fN <- paste(phid, tools::file_ext(photo$datapath), sep=".")
-  print(fN)
-  print(photo$name)
   
   #set pathways
-  dropPath <- file.path(dropfin, fN)
-  tempPath <- file.path("/Users/jmoxley/Downloads",
-                        paste0(phid, "_", as.integer(Sys.time()),
-                               ".", tools::file_ext(photo$datapath)))
-  print(dropPath)
-  print(tempPath)
-  print(class(photo))
-  print(paste0("datapath is ", file.exists(photo$datapath)))
-  #prep photo
+  dropPath <- file.path(dropfin)
+  cat("drop here: ", dropPath, "\n")
+  tempPath <- file.path(tempdir(), paste0(phid,
+                        ".", tools::file_ext(photo$datapath)))
+ 
   #write data & upload
   cat("Copying file to:", tempPath ,"\n")
   file.copy(from = photo$datapath, to = tempPath)
-  #file.copy(inFile$datapath, file.path("/Users/jmoxley/Downloads", inFile$name) )
   print(paste0("the local instance existence is ", file.exists(tempPath)))
-  #drop_upload(tempPath, dropPath, mode = "add")
+  drop_upload(tempPath, dropPath, mode = "add")
 }
 
 
