@@ -15,8 +15,10 @@ dropfin <- "FinID_curator/FinIDs_staging"
 #list of observers available to checkbox
 flds <- list(
   observers = c("PK", "SA", "SJ", "JM", "TC", "TW", "EM", "OJ"),
-  sites = c("PR", "FAR", "AN", "APT")
+  sites = c("PR", "FAR", "AN", "APT"),
+  mandatory = c("user", "site.phid", "date.phid", "sighting.phid", "sex", "size")
 )
+
 
 ##
 #attempt to generalize
@@ -32,7 +34,7 @@ entries <- list(
 
 
   
-  
+
 labelMandatory <- function(label) {
     tagList(
       label,
@@ -49,15 +51,23 @@ loadData <- function(dir) {
   data
 }
 #dropbox load
-loadData2 <- function(fileName, dir) {
-  key <- grepl()
-  #add pattern for unique fN for survey
-  files <- as.character(drop_dir(dropsc)$path_display)
-  data <- rbind(sapply(files, drop_read_csv))
+loadData2 <- function(phid.only = NULL) {
+  #survey.only takes a phid & subsets files to that survey
+  #get list of files
+  if(!is.null(phid.only)){
+    #extract only files w/in the survey
+    files <- as.character(drop_dir(dropsc)$path_display)[
+      grepl(substr(phid.only, 0, nchar(phid.only)-2), 
+            as.character(drop_dir(dropsc)$path_display))]
+  }else{
+    files <- as.character(drop_dir(dropsc)$path_display)
+  }
+  
+  #read in data
+  data <- lapply(files, drop_read_csv, stringsAsFactors = F)
+  data <- dplyr::bind_rows(data)
   data
 }
-
-
 
 ############
 ##STORAGE FXNS
@@ -85,39 +95,17 @@ saveData <- function(dat){
 saveData2 <- function(data) {
   # get positioned
   data <- data.frame(data, stringsAsFactors = F)
-  dropPath <- file.path(dropsc, data$fN)
+  dropPath <- file.path(dropsc, data$dfN)
   tempPath <- file.path(tempdir(),
-                        data$fN)
+                        data$dfN)
   print(paste("storing data in this file", dropPath))
-  
+  #one entry per file
   write.csv(data, tempPath, row.names = F, quote = TRUE)
   drop_upload(tempPath, path = dropsc, mode = "add")
-  #deprecated from appending/writing data
-  # if(drop_exists(dropPath)){
-  #   #read, append, and upload
-  #   dropdat <- drop_read_csv(dropPath)
-  #   data <- rbind(dropdat, data)
-  #   if(nrow(data) > nrow(dropdat)){
-  #     #update only if successfully appended data
-  #     write.csv(data, tempPath, row.names = FALSE, quote = TRUE)
-  #     }
-  #   drop_upload(tempPath, path = dropsc, mode = "overwrite")
-  # }else{
-  #   #write temp
-  #   write.csv(data, tempPath, row.names = FALSE, quote = TRUE)
-  #   #write if not
-  #   drop_upload(tempPath, path = dropsc, mode = "add")
-  # }
 }
 
 
 #save photo uploads w/ photoID
-# savePhoto <- function(photo){
-#   png("/Users/jmoxley/Downloads/here_lies_photo.png")
-#   fileName <- sprintf("here_lies_photo.png")
-#   file.copy(photo, "/Users/jmoxley/Downloads/here_lies_photo.png")
-#   dev.off()
-# }
 #dropbox style
 savePhoto2 <- function(photo, phid){
   
@@ -134,12 +122,14 @@ savePhoto2 <- function(photo, phid){
   drop_upload(tempPath, dropPath, mode = "add")
 }
 
-
 #timestamping
 epochTime <- function(){
   as.integer(Sys.time())
 }
   
+humanTime <- function(){
+  as.Date(as.character(Sys.time()))
+}
 #####
 #RESOURCES
 #####

@@ -65,12 +65,12 @@ shinyApp(ui = navbarPage(
              fileInput("fin.photo", "Upload fin here", 
                        multiple = F, accept=c("image/jpeg", "image/png", "image/tiff",
                                               ".jpeg", ".jpg", ".png", ".tiff")),
+             selectInput("sex", "Sex (U if unknown)", choices = c("M", "F", "U"), 
+                         selectize = F, selected = "U"), 
+             numericInput("size", "Size (in ft)", value = NULL, min = 4, max = 20, step = 0.5),
              hr(), #break in UI
              conditionalPanel(   #collect data once fin is uploaded & photoID is crorect       
                  condition = "output.finuploaded",
-                 selectInput("sex", "Sex (U if unknown)", choices = c("M", "F", "U"), 
-                             selectize = F, selected = "U"), 
-                 numericInput("size", "Size (in ft)", value = NULL, min = 4, max = 20, step = 0.5),
                  textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", 
                            width = "600px"),
                  selectInput("tag.exists", "Tagged Already?", choices = c("U", "Y"), selected = "U"),
@@ -98,11 +98,10 @@ shinyApp(ui = navbarPage(
              textOutput("PhotoID"),
              imageOutput(outputId = "FinShot", width = "auto", height="auto"),
              hr(),
-             textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", 
-                       width = "600px"),
-             textInput("time", "Time of Observation", placeholder = "24HR CLOCK PLS (e.g., 0915 for 9:15"),
-             hr(),
              conditionalPanel("output.finuploaded",
+                              textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", 
+                                        width = "600px"),
+                              textInput("time", "Time of Observation", placeholder = "24HR CLOCK PLS (e.g., 0915 for 9:15"),
                DT::dataTableOutput("dataentry"),
                actionButton("masfins", "Mas Fins?", class="btn-primary"),
                actionButton("r2submit", "Ready To Submit?", class="btn-primary")
@@ -149,6 +148,7 @@ server = function(input, output, session) {
   ##Page 2 server stuff
   
   #data gatekeeper, fields can be entered once PhotoID & file exists
+  phid <- reactiveValues()
   finUP <- reactive({
     if(is.null(input$fin.photo)){
       return(NULL)
@@ -158,13 +158,21 @@ server = function(input, output, session) {
       re1 <- reactive({gsub("\\\\","/", input$fin.photo$datapath)})
       output$FinShot <- renderImage({list(src = re1())}, deleteFile = FALSE)
       #make id
-      output$PhotoID <- renderText({paste0(toupper(input$site.phid),
-                                           format(input$date.phid, "%y%m%d"),
-                                           ifelse(nchar(input$sighting.phid==1),
-                                                  paste0("0", input$sighting.phid),
-                                                  input$sighting.phid))})
+      phid$val <- paste0(toupper(input$site.phid),
+                     format(input$date.phid, "%y%m%d"),
+                     ifelse(nchar(input$sighting.phid==1),
+                            paste0("0", input$sighting.phid),
+                            input$sighting.phid))
       
+      output$PhotoID <- renderText({phid$val})
+      # output$PhotoID <- renderText({paste0(toupper(input$site.phid),
+      #                                      format(input$date.phid, "%y%m%d"),
+      #                                      ifelse(nchar(input$sighting.phid==1),
+      #                                             paste0("0", input$sighting.phid),
+      #                                             input$sighting.phid))})
       
+      #return the photoID to splash around
+      return(phid)
     }
   })
   output$finuploaded <- reactive({
@@ -181,12 +189,25 @@ server = function(input, output, session) {
                   list(visible = F, targets = c(14:17))))
   )
   
+  #mandatory fields
+  # mandatoryFilled <- vapply(flds$mandatory, 
+  #                           function(x) {
+  #                             !is.null(input[[x]] && input[[x]] != "")
+  #                           },
+  #                           logical(1))
+  # mandatoryFilled <- all(mandatoryFilled)
   
   ######################
   ######################
   ##Page 3 server stuff
   #build data frame, needs to become reactive
   #output$reviewed <- renderText({input$reviewed})
+  #can we make this load sooner?? 
+  output$finsTable <- DT::renderDataTable(
+    loadData2(),
+    rownames = F, options = list(searching=F, lengthChange=F)
+  )
+  
   output$reviewed <- renderUI({
     if(input$reviewed == T){
       actionButton("SAVEDATA", "SUBMIT & STORE", class="btn-primary")}
@@ -213,11 +234,6 @@ server = function(input, output, session) {
     
       
     #can make the fields match zegami here? 
-    phid <- paste0(toupper(input$site.phid), 
-                      format(input$date.phid, "%y%m%d"), 
-                      ifelse(nchar(input$sighting.phid==1), 
-                             paste0("0", input$sighting.phid),
-                             input$sighting.phid))
     data <- c(refID = "UNMATCHED", name = "NONE_YET", 
               match.sugg = as.character(input$match.sugg), 
               time.obs = as.character(input$time),
@@ -229,7 +245,7 @@ server = function(input, output, session) {
               #                  ifelse(nchar(input$sighting.phid==1), 
               #                         paste0("0", input$sighting.phid),
               #                         input$sighting.phid)), 
-              PhotoID = as.character(phid),
+              PhotoID = as.character(phid$val),
               site = toupper(as.character(input$site.phid)), 
               date = as.character(input$date.phid), 
               sighting = as.character(input$sighting.phid),
@@ -246,18 +262,22 @@ server = function(input, output, session) {
               user = as.character(input$user),
               timestamp = epochTime(), 
               #one row, one entry, one photo
-              dfN = paste0("CCA_GWS_PHID_", 
+              dfN = file.path(paste0("CCA_GWS_PHID_", 
                           #photoID
-                           toupper(input$site.phid),
-                           format(input$date.phid, "%y%m%d"), 
-                           ifelse(nchar(input$sighting.phid==1), 
-                                 paste0("0", input$sighting.phid),
-                                 input$sighting.phid), "_",
+                           # toupper(input$site.phid),
+                           # format(input$date.phid, "%y%m%d"), 
+                           # ifelse(nchar(input$sighting.phid==1), 
+                           #       paste0("0", input$sighting.phid),
+                           #       input$sighting.phid), 
+                          phid$val, "_",
                           #timestamp
                            as.integer(Sys.time()),
-                           ".csv"),
+                          #extension
+                           ".csv")),
               #photo file
-              
+              pFn = file.path(dropfin, paste0(phid$val, 
+                                              ".", 
+                                              tools::file_ext(input$fin.photo$datapath))),
               survey.crew = as.character(paste(input$crew, collapse = "|")),
               survey.effortON = as.character(input$effort.on),
               survey.effortOFF = as.character(input$effort.off),
@@ -267,44 +287,19 @@ server = function(input, output, session) {
     data
     }
   })
-  
-  
-  # savePhoto <- reactive({
-  #   #save photo
-  #   if(is.null(finUP)){
-  #     return(NULL)
-  #     ##SOME WARNING DAATA WILL NOT BE SAVED W?O A PHOTO FILE
-  #   }
-  #   else{
-  #    cat("the datapath w/in sP() is", file.exists(rv$fin.photo$datapath), "\n")
-  #   }
-  # })
+
   
   ######################
   ######################
   ##Button doing stuff
   
   #Observe "mas fins" event here
-  #make the pathways
-  
-  #WHERE TO PUT IT TO DIFF FROM SUBMIT BUTTON? 
   observeEvent(input$masfins, {
     data <- data.frame(formData(), stringsAsFactors = F)
     saveData2(data)
-    #savePhoto()
-    savePhoto2(input$fin.photo, data$PhotoID)
+    
+    savePhoto2(input$fin.photo, phid$val)
     #save photo
-    # dropPath <- file.path(dropfin, data$fN)
-    # tempPath <- file.path(tempdir(),
-    #                       paste0(data$fN,
-    #                              ".", tools::file_ext(input$fin.photo$datapath)))
-    # print(tempPath)
-    # cat("the datapath is ", file.exists(input$fin.photo$datapath), "\n")
-    # cat("Copying file to:", tempPath ,"\n")
-    # file.copy(from = input$fin.photo$datapath, to = tempPath)
-    # print(paste0("the local instance existence is ", file.exists(tempPath)))
-    # drop_upload(tempPath, dropPath, mode = "add")
-    # 
     
     #update pg 3 
     # output$finsTable <- DT::renderDataTable(
@@ -312,10 +307,7 @@ server = function(input, output, session) {
     #   rownames = FALSE,
     #   options = list(searching = FALSE, lengthChange = FALSE)
     # )
-    output$finsTable <- DT::renderDataTable(
-      loadData2(data$fN),
-      rownames = F, options = list(searching=F, lengthChange=F)
-      )
+    
     
     #reset fields
     sapply(c("sighting", "sex", "size", "tag.exists", "tagdeployed", "tag.id",
