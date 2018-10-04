@@ -16,7 +16,7 @@ dropfin <- "FinID_curator/FinIDs_staging"
 flds <- list(
   observers = c("PK", "SA", "SJ", "JM", "TC", "TW", "EM", "OJ"),
   sites = c("PR", "FAR", "AN", "APT"),
-  mandatory = c("user", "site.phid", "date.phid", "sighting.phid", "sex", "size")
+  mandatory = c("user", "sex", "size")
 )
 
 
@@ -36,11 +36,12 @@ entries <- list(
   
 
 labelMandatory <- function(label) {
-    tagList(
-      label,
-      span("*", class = "mandatory_star")
+  tagList(
+    label,
+    span("*", class = "mandatory_star")
   )
 }
+
 
 #get data
 loadData <- function(dir) {

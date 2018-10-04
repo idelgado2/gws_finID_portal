@@ -6,6 +6,10 @@ source("fin_shiny_fxns2.R")
 #set up dropbox
 token <- readRDS("droptoken.rds")
 drop_acc(dtoken=token)
+appCSS <- ".mandatory_star { color: red; }"
+#database for survey entries
+dB <- data.frame(NULL)
+
 #set up acct
 #Sys.setlocale(locale="en_US.UTF-8")
 
@@ -22,17 +26,15 @@ shinyApp(ui = navbarPage(
   tabPanel("Survey Info",
            sidebarPanel(
              #Survey inputs
+             #file upload
+             selectInput("site.phid", labelMandatory("Survey site"),
+                         choices = flds$sites),
+             dateInput("date.phid", labelMandatory("Survey date"), 
+                       value = Sys.Date(), format = "yyyy-mm-dd"),
+             hr(),
              checkboxGroupInput("crew", "Crew", 
                                 choices = flds$observers, inline = T),
-             textInput("vessel", "Vessel platform", placeholder = "Kingfisher Skiff? Norcal? R/V BS?"),
-             hr(),
-             selectInput("survey", "Survey Location",
-                         choices = flds$sites),
-             dateInput("date.survey", "Date", 
-                       value = Sys.Date(), format = "yyyy-mm-dd")
-             ###MAKE THIS THE X/Y BIT
-             ###sal wants xy bit in the fin ID
-             
+             textInput("vessel", "Vessel", placeholder = "MBA Skiff? Norcal? R/V BS?")
              ),
            mainPanel(
              #outputs for tab 1
@@ -51,23 +53,28 @@ shinyApp(ui = navbarPage(
   ##FIN ID ENTRY##
   ################
   tabPanel("Fin Photo Entry",
+           shinyjs::inlineCSS(appCSS),
            sidebarPanel(
-             #file upload
-             radioButtons("user", "User", 
-                                choices = flds$observers, inline = T),
+             
              #PhotoID fields first
-             selectInput("site.phid", "Monitoring Site", selected = uiOutput("site.survey"),
-                         choices = flds$sites),
-             dateInput("date.phid", "Date", value = NULL, format = "yyyy-mm-dd"),
-             numericInput("sighting.phid", "Sighting #", value = NULL, 
+             #selectInput("site.phid", labelMandatory("Monitoring Site"), selected = uiOutput("site.survey"),
+             #            choices = flds$sites),
+             #dateInput("date.phid", labelMandatory("Date"), value = NULL, format = "yyyy-mm-dd"),
+             radioButtons("user", "User", 
+                          choices = flds$observers, inline = T, selected=character(0)),
+             uiOutput("site.phid"),
+             uiOutput("date.phid"),
+             numericInput("sighting.phid", labelMandatory("Sighting #"), value = NULL, 
                           min = 01, max = 99, step =1), #MAKE THIS NUMERIC?
              hr(),
-             fileInput("fin.photo", "Upload fin here", 
+             fileInput("fin.photo", labelMandatory("Upload fin here"), 
                        multiple = F, accept=c("image/jpeg", "image/png", "image/tiff",
                                               ".jpeg", ".jpg", ".png", ".tiff")),
-             selectInput("sex", "Sex (U if unknown)", choices = c("M", "F", "U"), 
+             textInput("time", labelMandatory("Time of Observation"), placeholder = "24HR CLOCK PLS (e.g., 0915 for 9:15"),
+             hr(),
+             selectInput("sex", labelMandatory("Sex (U if unknown)"), choices = c("M", "F", "U"), 
                          selectize = F, selected = "U"), 
-             numericInput("size", "Size (in ft)", value = NULL, min = 4, max = 20, step = 0.5),
+             numericInput("size", labelMandatory("Size (in ft)"), value = NULL, min = 4, max = 20, step = 0.5),
              hr(), #break in UI
              conditionalPanel(   #collect data once fin is uploaded & photoID is crorect       
                  condition = "output.finuploaded",
@@ -96,12 +103,11 @@ shinyApp(ui = navbarPage(
            mainPanel(useShinyjs(),
              textOutput("dp"),
              textOutput("PhotoID"),
-             imageOutput(outputId = "FinShot", width = "auto", height="auto"),
              hr(),
              conditionalPanel("output.finuploaded",
                               textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", 
                                         width = "600px"),
-                              textInput("time", "Time of Observation", placeholder = "24HR CLOCK PLS (e.g., 0915 for 9:15"),
+                              imageOutput(outputId = "FinShot", width = "auto", height="auto"),
                DT::dataTableOutput("dataentry"),
                actionButton("masfins", "Mas Fins?", class="btn-primary"),
                actionButton("r2submit", "Ready To Submit?", class="btn-primary")
@@ -136,12 +142,18 @@ server = function(input, output, session) {
   ######################
   ##Page 1 server stuff
   #update phids from survey
-  observeEvent(input$survey,{
-    updateSelectInput(session, "site.phid", selected = input$survey)
-  }) 
-  observeEvent(input$date.survey,{
-    updateDateInput(session, "date.phid", value = input$date.survey)
-  })
+  # observeEvent(input$survey,{
+  #   updateSelectInput(session, "site.phid", selected = input$survey)
+  # }) 
+  # observeEvent(input$date.survey,{
+  #   updateDateInput(session, "date.phid", value = input$date.survey)
+  # })
+  output$site.phid = renderText({paste("<font color=\"#FF0000\"><b>SURVEY SITE<font color=\"#000000\"></b> assigned as: ", 
+                                       HTML(paste0("<font color=\"#FF0000\"><b>", input$site.phid, "<b>")))})
+  output$date.phid = renderText({paste(HTML("<font color=\"#FF0000\"><b>SURVEY DATE<font color=\"#000000\"></b> assigned as: "), 
+                                       HTML(paste0("<font color=\"#FF0000\"><b>",
+                                                   as.Date(input$date.phid, format = "%m-%d-%Y"),
+                                                   "</b>")))})
   
   ######################
   ######################
@@ -189,13 +201,20 @@ server = function(input, output, session) {
                   list(visible = F, targets = c(14:17))))
   )
   
-  #mandatory fields
-  # mandatoryFilled <- vapply(flds$mandatory, 
-  #                           function(x) {
-  #                             !is.null(input[[x]] && input[[x]] != "")
-  #                           },
-  #                           logical(1))
-  # mandatoryFilled <- all(mandatoryFilled)
+  #submit buttons only if fields are filled, theres a photo, & proper photoID
+  observe({
+    mandatoryFilled <- vapply(flds$mandatory,
+                            function(x) {
+                              
+                              !is.null(input[[x]]) && input[[x]] != "" && !is.null(finUP())
+                            },
+                            logical(1))
+  
+  mandatoryFilled <- all(mandatoryFilled)
+  
+  shinyjs::toggleState(id = "masfins", condition = mandatoryFilled)
+  shinyjs::toggleState(id = "r2submit", condition = mandatoryFilled)
+  })
   
   ######################
   ######################
@@ -203,10 +222,7 @@ server = function(input, output, session) {
   #build data frame, needs to become reactive
   #output$reviewed <- renderText({input$reviewed})
   #can we make this load sooner?? 
-  output$finsTable <- DT::renderDataTable(
-    loadData2(),
-    rownames = F, options = list(searching=F, lengthChange=F)
-  )
+  
   
   output$reviewed <- renderUI({
     if(input$reviewed == T){
@@ -299,6 +315,13 @@ server = function(input, output, session) {
     saveData2(data)
     
     savePhoto2(input$fin.photo, phid$val)
+    #append to database for review
+    dB <- dplyr::bind_rows(dB, data)
+    output$finsTable <- DT::renderDataTable(
+      #loadData2(),
+      dB,
+      rownames = F, options = list(searching=F, lengthChange=F)
+    )
     #save photo
     
     #update pg 3 
@@ -314,6 +337,11 @@ server = function(input, output, session) {
              "tag.side", "biopsy", "biopsy.id", "notes", "tag.notes",
              "fin.photo", "PhotoID", "finuploaded", "match.sugg", "time", "FinShot"), 
            reset)
+    output$FinShot <- NULL
+    output$dataentry <- NULL
+    output$PhotoID <- NULL
+    phid$val <- NULL
+    
     reset("data")
     
   })
