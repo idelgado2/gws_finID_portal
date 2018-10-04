@@ -1,7 +1,8 @@
 #Data Entry for GWS Monitoring CentralCA
-#uses multiple panels for survey info, Photo entry, Data Submission
+#New gen, attempt to implement:
+#update msg's, less buggy buttons, naming conflicts, & x/y leaflet
 #JHMoxley, 9/25/18
-#
+
 source("fin_shiny_fxns2.R")
 #set up dropbox
 token <- readRDS("droptoken.rds")
@@ -10,12 +11,8 @@ appCSS <- ".mandatory_star { color: red; }"
 #database for survey entries
 dB <- data.frame(NULL)
 
-#set up acct
-#Sys.setlocale(locale="en_US.UTF-8")
-
-
-# dd <- file.path("entries")
-# fN = "here_lies_data.csv"
+####
+#APP
 shinyApp(ui = navbarPage(
   id = "form",
   title = "FinID Data Entry",
@@ -35,13 +32,13 @@ shinyApp(ui = navbarPage(
              checkboxGroupInput("crew", "Crew", 
                                 choices = flds$observers, inline = T),
              textInput("vessel", "Vessel", placeholder = "MBA Skiff? Norcal? R/V BS?")
-             ),
+           ),
            mainPanel(
              #outputs for tab 1
              sliderInput("effort.on", "On Effort?", 
-                       value = 8, min = 4, max = 20, step = 0.5),
+                         value = 8, min = 4, max = 20, step = 0.5),
              sliderInput("effort.off", "Off Effort?",
-                       value = 15, min = 4, max = 20, step = 0.5),
+                         value = 15, min = 4, max = 20, step = 0.5),
              textInput("notes.survey", "Notes from survey day", 
                        placeholder = "breaches? predations?", width = "100%"),
              textOutput("crew")
@@ -77,43 +74,43 @@ shinyApp(ui = navbarPage(
              numericInput("size", labelMandatory("Size (in ft)"), value = NULL, min = 4, max = 20, step = 0.5),
              hr(), #break in UI
              conditionalPanel(   #collect data once fin is uploaded & photoID is crorect       
-                 condition = "output.finuploaded",
-                 textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", 
-                           width = "600px"),
-                 selectInput("tag.exists", "Tagged Already?", choices = c("U", "Y"), selected = "U"),
-                 selectInput("tagdeployed", "New Tag?", choices = c("None", "PAT", "Acoustic", "Stomach", "Clamp"), selected = "None"),
-                 #make ^ check box and conditional panel for each tag selected?
+               condition = "output.finuploaded",
+               textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", 
+                         width = "600px"),
+               selectInput("tag.exists", "Tagged Already?", choices = c("U", "Y"), selected = "U"),
+               selectInput("tagdeployed", "New Tag?", choices = c("None", "PAT", "Acoustic", "Stomach", "Clamp"), selected = "None"),
+               #make ^ check box and conditional panel for each tag selected?
+               conditionalPanel(
+                 condition = "input.tagdeployed != 'None'",
+                 radioButtons("tag.side", "Deployed On? ", choices = c("NA", "L", "R"), 
+                              inline = T), 
+                 textInput("tag.id", "Tag ID#"),
+                 textInput("tag.notes", "Tagging Notes", width = '600px', 
+                           placeholder = "e.g., programming params, Ptt/SPOT used, orientation"),
+                 selectInput("biopsy", "Biopsy?", choices = c("N", "Y"), selected="N"),
                  conditionalPanel(
-                   condition = "input.tagdeployed != 'None'",
-                   radioButtons("tag.side", "Deployed On? ", choices = c("NA", "L", "R"), 
-                                      inline = T), 
-                   textInput("tag.id", "Tag ID#"),
-                   textInput("tag.notes", "Tagging Notes", width = '600px', 
-                             placeholder = "e.g., programming params, Ptt/SPOT used, orientation"),
-                   selectInput("biopsy", "Biopsy?", choices = c("N", "Y"), selected="N"),
-                   conditionalPanel(
-                     condition = "input.biospy != 'N'",
-                     textInput("biopsy.id", "Vial Number?")
-                   )
+                   condition = "input.biospy != 'N'",
+                   textInput("biopsy.id", "Vial Number?")
                  )
+               )
              )
              
              
            ), 
            mainPanel(useShinyjs(),
-             uiOutput("site.phid"),
-             uiOutput("date.phid"),
-             uiOutput("PhotoID"),
-             hr(),
-             conditionalPanel("output.finuploaded",
-                              textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", 
-                                        width = "600px"),
-                              imageOutput(outputId = "FinShot", width = "auto", height="auto"),
-               DT::dataTableOutput("dataentry"),
-               actionButton("masfins", "Mas Fins?", class="btn-primary"),
-               actionButton("r2submit", "Ready To Submit?", class="btn-primary")
-               #submit button that tabs to next panel?
-             )
+                     uiOutput("site.phid"),
+                     uiOutput("date.phid"),
+                     uiOutput("PhotoID"),
+                     hr(),
+                     conditionalPanel("output.finuploaded",
+                                      textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", 
+                                                width = "600px"),
+                                      imageOutput(outputId = "FinShot", width = "auto", height="auto"),
+                                      DT::dataTableOutput("dataentry"),
+                                      actionButton("masfins", "Mas Fins?", class="btn-primary"),
+                                      actionButton("r2submit", "Ready To Submit?", class="btn-primary")
+                                      #submit button that tabs to next panel?
+                     )
            )
   ),
   ################
@@ -129,7 +126,7 @@ shinyApp(ui = navbarPage(
              
              #reveal button if data is reviewed
              uiOutput("reviewed")
-        )
+           )
   )
 ),
 ################
@@ -172,10 +169,10 @@ server = function(input, output, session) {
       output$FinShot <- renderImage({list(src = re1())}, deleteFile = FALSE)
       #make id
       phid$val <- paste0(toupper(input$site.phid),
-                     format(input$date.phid, "%y%m%d"),
-                     ifelse(nchar(input$sighting.phid==1),
-                            paste0("0", input$sighting.phid),
-                            input$sighting.phid))
+                         format(input$date.phid, "%y%m%d"),
+                         ifelse(nchar(input$sighting.phid==1),
+                                paste0("0", input$sighting.phid),
+                                input$sighting.phid))
       
       output$PhotoID <- renderText({paste(HTML("<font color=\"#FF0000\"><b>PHOTO ID<font color=\"#000000\"></b> assigned as: "), 
                                           HTML(paste0("<font color=\"#FF0000\"><b>",
@@ -198,26 +195,26 @@ server = function(input, output, session) {
   outputOptions(output, 'finuploaded', suspendWhenHidden=F)
   
   output$dataentry <- DT::renderDataTable(
-      formData(),
-      rownames = FALSE,
-      options = list(searching = FALSE, lengthChange = FALSE,
-                columnDefs=list(
-                  list(visible = F, targets = c(14:17))))
+    formData(),
+    rownames = FALSE,
+    options = list(searching = FALSE, lengthChange = FALSE,
+                   columnDefs=list(
+                     list(visible = F, targets = c(14:17))))
   )
   
   #submit buttons only if fields are filled, theres a photo, & proper photoID
   observe({
     mandatoryFilled <- vapply(flds$mandatory,
-                            function(x) {
-                              
-                              !is.null(input[[x]]) && input[[x]] != "" && !is.null(finUP())
-                            },
-                            logical(1))
-  
-  mandatoryFilled <- all(mandatoryFilled)
-  
-  shinyjs::toggleState(id = "masfins", condition = mandatoryFilled)
-  shinyjs::toggleState(id = "r2submit", condition = mandatoryFilled)
+                              function(x) {
+                                
+                                !is.null(input[[x]]) && input[[x]] != "" && !is.null(finUP())
+                              },
+                              logical(1))
+    
+    mandatoryFilled <- all(mandatoryFilled)
+    
+    shinyjs::toggleState(id = "masfins", condition = mandatoryFilled)
+    shinyjs::toggleState(id = "r2submit", condition = mandatoryFilled)
   })
   
   ######################
@@ -240,7 +237,7 @@ server = function(input, output, session) {
   #   }
   # })
   # output$reviewed <- return(review())
-
+  
   ######################
   ######################
   ##Data making stuff
@@ -249,65 +246,65 @@ server = function(input, output, session) {
     if(is.null(finUP)){
       return(NULL)
       ##SOME WARNING DAATA WILL NOT BE SAVED W?O A PHOTO FILE
-      }
+    }
     else{
-    
       
-    #can make the fields match zegami here? 
-    data <- c(refID = "UNMATCHED", name = "NONE_YET", 
-              match.sugg = as.character(input$match.sugg), 
-              time.obs = as.character(input$time),
-              # PhotoID = paste0(toupper(input$site.phid), 
-              #                  format(input$date.phid, "%y%m%d"), 
-              #                  sprintf("%02s", input$sighting.phid)), 
-              # PhotoID = paste0(toupper(input$site.phid), 
-              #                  format(input$date.phid, "%y%m%d"), 
-              #                  ifelse(nchar(input$sighting.phid==1), 
-              #                         paste0("0", input$sighting.phid),
-              #                         input$sighting.phid)), 
-              PhotoID = as.character(phid$val),
-              site = toupper(as.character(input$site.phid)), 
-              date = as.character(input$date.phid), 
-              sighting = as.character(input$sighting.phid),
-              sex = as.character(input$sex),
-              size = as.character(round(input$size/0.5)*0.5),
-              tag.exists = as.character(input$tag.exists),
-              tag.deployed = as.character(input$tagdeployed),
-              tag.id = as.character(input$tag.id),
-              tag.side = as.character(input$tag.side),
-              biopsy = as.character(input$biopsy),
-              biopsy.id = as.character(input$biopsy.id),
-              notes = as.character(input$notes),
-              tagging.notes = as.character(input$tag.notes),
-              user = as.character(input$user),
-              timestamp = epochTime(), 
-              #one row, one entry, one photo
-              dfN = file.path(paste0("CCA_GWS_PHID_", 
-                          #photoID
-                           # toupper(input$site.phid),
-                           # format(input$date.phid, "%y%m%d"), 
-                           # ifelse(nchar(input$sighting.phid==1), 
-                           #       paste0("0", input$sighting.phid),
-                           #       input$sighting.phid), 
-                          phid$val, "_",
-                          #timestamp
-                           as.integer(Sys.time()),
-                          #extension
-                           ".csv")),
-              #photo file
-              pFn = file.path(dropfin, paste0(phid$val, 
-                                              ".", 
-                                              tools::file_ext(input$fin.photo$datapath))),
-              survey.crew = as.character(paste(input$crew, collapse = "|")),
-              survey.effortON = as.character(input$effort.on),
-              survey.effortOFF = as.character(input$effort.off),
-              survey.notes = as.character(input$survey.notes)
-    )
-    data <- t(data)
-    data
+      
+      #can make the fields match zegami here? 
+      data <- c(refID = "UNMATCHED", name = "NONE_YET", 
+                match.sugg = as.character(input$match.sugg), 
+                time.obs = as.character(input$time),
+                # PhotoID = paste0(toupper(input$site.phid), 
+                #                  format(input$date.phid, "%y%m%d"), 
+                #                  sprintf("%02s", input$sighting.phid)), 
+                # PhotoID = paste0(toupper(input$site.phid), 
+                #                  format(input$date.phid, "%y%m%d"), 
+                #                  ifelse(nchar(input$sighting.phid==1), 
+                #                         paste0("0", input$sighting.phid),
+                #                         input$sighting.phid)), 
+                PhotoID = as.character(phid$val),
+                site = toupper(as.character(input$site.phid)), 
+                date = as.character(input$date.phid), 
+                sighting = as.character(input$sighting.phid),
+                sex = as.character(input$sex),
+                size = as.character(round(input$size/0.5)*0.5),
+                tag.exists = as.character(input$tag.exists),
+                tag.deployed = as.character(input$tagdeployed),
+                tag.id = as.character(input$tag.id),
+                tag.side = as.character(input$tag.side),
+                biopsy = as.character(input$biopsy),
+                biopsy.id = as.character(input$biopsy.id),
+                notes = as.character(input$notes),
+                tagging.notes = as.character(input$tag.notes),
+                user = as.character(input$user),
+                timestamp = epochTime(), 
+                #one row, one entry, one photo
+                dfN = file.path(paste0("CCA_GWS_PHID_", 
+                                       #photoID
+                                       # toupper(input$site.phid),
+                                       # format(input$date.phid, "%y%m%d"), 
+                                       # ifelse(nchar(input$sighting.phid==1), 
+                                       #       paste0("0", input$sighting.phid),
+                                       #       input$sighting.phid), 
+                                       phid$val, "_",
+                                       #timestamp
+                                       as.integer(Sys.time()),
+                                       #extension
+                                       ".csv")),
+                #photo file
+                pFn = file.path(dropfin, paste0(phid$val, 
+                                                ".", 
+                                                tools::file_ext(input$fin.photo$datapath))),
+                survey.crew = as.character(paste(input$crew, collapse = "|")),
+                survey.effortON = as.character(input$effort.on),
+                survey.effortOFF = as.character(input$effort.off),
+                survey.notes = as.character(input$survey.notes)
+      )
+      data <- t(data)
+      data
     }
   })
-
+  
   
   ######################
   ######################
@@ -362,7 +359,7 @@ server = function(input, output, session) {
   
   ##actions once data can be stored
   observeEvent(input$SAVEDATA,{
-
+    
   })
   
 }
