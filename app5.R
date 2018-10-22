@@ -108,12 +108,12 @@ shinyApp(ui = navbarPage(
                                       imageOutput(outputId = "FinShot", width = "auto", height="auto"),
                                       DT::dataTableOutput("dataentry"),
                                       conditionalPanel("mandatoryFilled",
-                                      actionButton("masfins", "Mas Fins?", class="btn-primary"),
-                                      actionButton("r2submit", "Ready To Submit?", class="btn-primary")
+                                                       actionButton("masfins", "Mas Fins?", class="btn-primary"),
+                                                       actionButton("r2submit", "Ready To Submit?", class="btn-primary")
                                       )#submit button that tabs to next panel?
                      )
            )
-             
+           
   ),
   ################
   ##DATA SUBMISSION##
@@ -193,7 +193,7 @@ server = function(input, output, session) {
   output$finuploaded <- reactive({
     #hide the data entry tbl until essential info is included
     return(!is.null(finUP()) && grepl("^([A-Z]{2,3})([0-9]{8})", phid$val))
-             #!is.na(input$sighting.phid))
+    #!is.na(input$sighting.phid))
   })
   outputOptions(output, 'finuploaded', suspendWhenHidden=F)
   
@@ -324,16 +324,16 @@ server = function(input, output, session) {
   observeEvent(input$masfins, {
     showNotification(paste(data$dfN, "being uploaded to", dropsc), 
                      #action = a(href="javascript:location.reload();", "Reload page"),
-                                closeButton = F, type = "message", duration=9,
-                                id = "datUP")
+                     closeButton = F, type = "message", duration=9,
+                     id = "datUP")
     data <- data.frame(formData(), stringsAsFactors = F)
     saveData2(data)
     
     savePhoto2(input$fin.photo, phid$val)
     showNotification(paste(phid$val, "photo uploaded to", dropfin), 
                      #action = a(href="javascript:location.reload();", "Reload page"), 
-                                closeButton = F, type = "message", duration=9,
-                                id = "phidUP")
+                     closeButton = F, type = "message", duration=9,
+                     id = "phidUP")
     
     #append to database for review
     #dB <- dplyr::bind_rows(dB, data)
