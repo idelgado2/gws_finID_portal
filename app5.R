@@ -102,6 +102,8 @@ shinyApp(ui = navbarPage(
                      uiOutput("date.phid"),
                      uiOutput("PhotoID"),
                      hr(),
+                     leafletOutput("map"),
+                     hr(),
                      conditionalPanel("output.finuploaded",
                                       textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", 
                                                 width = "600px"),
@@ -119,7 +121,11 @@ shinyApp(ui = navbarPage(
   ##DATA SUBMISSION##
   ################
   tabPanel("Data Submission",
+           # fluidRow(
+           #   verbatimTextOutput('x4')
+           # ),
            fluidPage(
+             verbatimTextOutput('x4'),
              checkboxInput("reviewed", 
                            label = "I HAVE VERIFIED THE DATA", 
                            value = F),
@@ -186,6 +192,27 @@ server = function(input, output, session) {
       #                                             paste0("0", input$sighting.phid),
       #                                             input$sighting.phid))})
       
+      
+      #make site map
+      output$map <- renderLeaflet({
+        leaflet() %>%
+          addProviderTiles(providers$Stamen.TonerLite,
+                           options = providerTileOptions(noWrap=T)) %>%
+          #addMarkers(data = matrix(c(-123.01, 37.69), nrow=1))
+          setView(lng=-123.02, lat = 37.69, zoom = 14) 
+      })
+      observeEvent(input$map_click,{
+        #capture click
+        click <- input$map_click
+        clat <- click$lat
+        clong <- click$lng
+        #print("pos is", clat, clong)
+        #add to map
+        leafletProxy('map') %>%
+          addMarkers(lng=clong, lat=clat)
+        
+      })
+      
       #return the photoID to splash around
       return(phid)
     }
@@ -203,7 +230,11 @@ server = function(input, output, session) {
     options = list(searching = FALSE, lengthChange = FALSE,
                    columnDefs=list(
                      list(visible = F, targets = c(14:17))))
-  )
+    )
+    
+    
+    
+    
   
   #submit buttons only if fields are filled, theres a photo, & proper photoID
   observe({
@@ -312,13 +343,25 @@ server = function(input, output, session) {
   ######################
   ######################
   ##Button doing stuff
+  #attempt here to develop ability to load data prior to clicking over to page 3
   dB <- reactiveValues()
   dropdB <- reactive({loadData2(phid.only = phid$val)})
+  
   #update page 3 from the get go
   output$finsTable <- DT::renderDataTable(
     loadData2(),
-    rownames = F, options=list(searching=F, lengthChange=F)
+    rownames = F, options=list(searching=F, lengthChange=F, paging =F),
+    server = T, editable = T
   )
+  #messaging of rows selected for deletion
+  output$x4 = renderPrint({
+    s = input$finsTable_rows_selected
+    #phids.sel <- input$finsTable[s, 5]
+    if (length(s)) {
+      cat('These rows were selected:\n\n')
+      cat(s, sep = ', ')
+    }
+  })
   
   #Observe "mas fins" event here
   observeEvent(input$masfins, {

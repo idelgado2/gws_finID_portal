@@ -5,6 +5,8 @@ require(DT)
 require(shinyTime)
 require(shinyjs)
 require(rdrop2)
+library(leaflet)
+
 
 #dirs
 #dropbox spot
@@ -16,9 +18,13 @@ dropfin <- "FinID_curator/FinIDs_staging"
 flds <- list(
   observers = c("PK", "SA", "SJ", "JM", "TC", "TW", "EM", "OJ"),
   sites = c("PR", "FAR", "AN", "APT"),
-  mandatory = c("user", "sex", "size")
+  mandatory = c("user", "sex", "size"),
+  coords = list(matrix(c(-123.00, 38.24), nrow=1), #Tomales station
+                 matrix(c(-123.00, 37.69), nrow=1), #MiroungaBay station
+                 matrix(c(-122.34, 37.11), nrow=1), #Ano tation
+                 matrix(c(-121.93, 36.97), nrow=1))
 )
-
+names(flds$coords) <- flds$sites
 
 ##
 #attempt to generalize
@@ -32,9 +38,7 @@ entries <- list(
   #list(id = "size", type = )
 )
 
-
-  
-
+#add a red star next to mandatory fields
 labelMandatory <- function(label) {
   tagList(
     label,
@@ -64,10 +68,26 @@ loadData2 <- function(phid.only = NULL) {
     files <- as.character(drop_dir(dropsc)$path_display)
   }
   
-  #read in data
-  data <- lapply(files, drop_read_csv, stringsAsFactors = F)
+  #read in data, all character classes
+  data <- lapply(files, drop_read_csv, stringsAsFactors = F, 
+                 as.is = T, colClasses = "character")
   data <- dplyr::bind_rows(data)
+  
+  #delete column for radio button approach??
+  # del <- matrix(as.character(1), nrow = nrow(data), ncol = 1, byrow =T, 
+  #               dimnames = list(data$PhotoID))
   data
+}
+
+#ban phids returns a vector of phids existing w/in the folders that cannot be duplicated
+getExistingPhids <- function(all=F){
+  if(is.null(dir)){
+    #get them everywhere
+    files <- c(drop_dir(dropsc), 
+               drop_dir(dropfin))
+  }else{
+    files <- drop_dir(dir)
+  }
 }
 
 ############
@@ -120,7 +140,7 @@ savePhoto2 <- function(photo, phid){
   cat("Copying file to:", tempPath ,"\n")
   file.copy(from = photo$datapath, to = tempPath)
   print(paste0("the local instance existence is ", file.exists(tempPath)))
-  drop_upload(tempPath, dropPath, mode = "add")
+  drop_upload(tempPath, dropPath, mode = "add", autorename=T)
 }
 
 #timestamping
