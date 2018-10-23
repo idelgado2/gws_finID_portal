@@ -6,6 +6,7 @@ require(shinyTime)
 require(shinyjs)
 require(rdrop2)
 library(leaflet)
+library(leaflet.extras)
 
 
 #dirs

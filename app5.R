@@ -103,6 +103,7 @@ shinyApp(ui = navbarPage(
                      uiOutput("PhotoID"),
                      hr(),
                      leafletOutput("map"),
+                     uiOutput("lat"),
                      hr(),
                      conditionalPanel("output.finuploaded",
                                       textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", 
@@ -193,7 +194,7 @@ server = function(input, output, session) {
       #                                             input$sighting.phid))})
       
       
-      #make site map
+      #make site map for leaflet input
       output$map <- renderLeaflet({
         leaflet() %>%
           addProviderTiles(providers$Stamen.TonerLite,
@@ -209,12 +210,18 @@ server = function(input, output, session) {
         #print("pos is", clat, clong)
         #add to map
         leafletProxy('map') %>%
-          addMarkers(lng=clong, lat=clat)
+          clearMarkers() %>% 
+          addPulseMarkers(data = click, lng=~lng, lat=~lat, icon = makePulseIcon(), 
+                          options = leaflet::markerOptions(draggable = T))
+        #MIGHT NOT UPDATE LOC?? make draggable false
         
+        output$lat <- renderText(click$lat)
+        output$lon <- renderText(click$lng)
       })
       
       #return the photoID to splash around
       return(phid)
+      
     }
   })
   output$finuploaded <- reactive({
@@ -232,7 +239,7 @@ server = function(input, output, session) {
                      list(visible = F, targets = c(14:17))))
     )
     
-    
+ 
     
     
   
