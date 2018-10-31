@@ -5,7 +5,7 @@
 
 source("fin_shiny_fxns2.R")
 #set up dropbox
-token <- readRDS("droptoken.rds")
+token <- readRDS("droptoken.rds") 
 drop_acc(dtoken=token)
 appCSS <- ".mandatory_star { color: red; }"
 #database for survey entries
@@ -102,13 +102,13 @@ shinyApp(ui = navbarPage(
                      uiOutput("date.phid"),
                      uiOutput("PhotoID"),
                      hr(),
-                     leafletOutput("map"),
-                     uiOutput("lat"),
-                     hr(),
                      conditionalPanel("output.finuploaded",
                                       textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", 
                                                 width = "600px"),
                                       imageOutput(outputId = "FinShot", width = "auto", height="auto"),
+                                      hr(),
+                                      leafletOutput("map"),
+                                      uiOutput("xyloc"),
                                       DT::dataTableOutput("dataentry"),
                                       conditionalPanel("mandatoryFilled",
                                                        actionButton("masfins", "Mas Fins?", class="btn-primary"),
@@ -195,28 +195,30 @@ server = function(input, output, session) {
       
       
       #make site map for leaflet input
+      ctr <- flds$coords[[input$site.phid]]
       output$map <- renderLeaflet({
         leaflet() %>%
           addProviderTiles(providers$Stamen.TonerLite,
                            options = providerTileOptions(noWrap=T)) %>%
           #addMarkers(data = matrix(c(-123.01, 37.69), nrow=1))
-          setView(lng=-123.02, lat = 37.69, zoom = 14) 
+          setView(lng=ctr[1,1], lat = ctr[1,2], zoom = 14) 
       })
       observeEvent(input$map_click,{
         #capture click
         click <- input$map_click
-        clat <- click$lat
-        clong <- click$lng
+        phid$lat <- click$lat
+        phid$long <- click$lng
         #print("pos is", clat, clong)
         #add to map
         leafletProxy('map') %>%
           clearMarkers() %>% 
           addPulseMarkers(data = click, lng=~lng, lat=~lat, icon = makePulseIcon(), 
-                          options = leaflet::markerOptions(draggable = T))
+                          options = leaflet::markerOptions(draggable = F))
         #MIGHT NOT UPDATE LOC?? make draggable false
         
-        output$lat <- renderText(click$lat)
-        output$lon <- renderText(click$lng)
+        output$xyloc <- renderText({paste("lat: ", round(click$lat, 4),
+                                          "| long: ", round(click$lng, 4))})
+        
       })
       
       #return the photoID to splash around
@@ -318,6 +320,8 @@ server = function(input, output, session) {
                 notes = as.character(input$notes),
                 tagging.notes = as.character(input$tag.notes),
                 user = as.character(input$user),
+                lat.approx = as.character(round(as.numeric(phid$lat), 4)),
+                long.approx = as.character(round(as.numeric(phid$long), 4)),
                 timestamp = epochTime(), 
                 #one row, one entry, one photo
                 dfN = file.path(paste0("CCA_GWS_PHID_", 
@@ -352,7 +356,7 @@ server = function(input, output, session) {
   ##Button doing stuff
   #attempt here to develop ability to load data prior to clicking over to page 3
   dB <- reactiveValues()
-  dropdB <- reactive({loadData2(phid.only = phid$val)})
+  dropdB <- reactive({loadData2(phid.only = phid$val, token = token)})
   
   #update page 3 from the get go
   output$finsTable <- DT::renderDataTable(
@@ -372,11 +376,11 @@ server = function(input, output, session) {
   
   #Observe "mas fins" event here
   observeEvent(input$masfins, {
+    data <- data.frame(formData(), stringsAsFactors = F)
     showNotification(paste(data$dfN, "being uploaded to", dropsc), 
                      #action = a(href="javascript:location.reload();", "Reload page"),
                      closeButton = F, type = "message", duration=9,
                      id = "datUP")
-    data <- data.frame(formData(), stringsAsFactors = F)
     saveData2(data)
     
     savePhoto2(input$fin.photo, phid$val)

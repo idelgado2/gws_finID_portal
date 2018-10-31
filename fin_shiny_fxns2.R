@@ -14,6 +14,7 @@ library(leaflet.extras)
 dropdd <- "FinID_curator/archive"
 dropsc <- "FinID_curator/scratch"
 dropfin <- "FinID_curator/FinIDs_staging"
+token <- readRDS("droptoken.rds") 
 
 #list of observers available to checkbox
 flds <- list(
