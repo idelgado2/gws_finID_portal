@@ -61,19 +61,21 @@ loadData <- function(dir) {
 loadData2 <- function(phid.only = NULL) {
   #survey.only takes a phid & subsets files to that survey
   #get list of files
-  if(!is.null(phid.only)){
-    #extract only files w/in the survey
-    files <- as.character(drop_dir(dropsc)$path_display)[
-      grepl(substr(phid.only, 0, nchar(phid.only)-2), 
-            as.character(drop_dir(dropsc)$path_display))]
-  }else{
-    files <- as.character(drop_dir(dropsc)$path_display)
-  }
+  # if(!is.null(phid.only)){
+  #   #extract only files w/in the survey
+  #   files <- as.character(drop_dir(dropsc)$path_display)[
+  #     grepl(substr(phid.only, 0, nchar(phid.only)-2), 
+  #           as.character(drop_dir(dropsc)$path_display))]
+  # }else{
+  #   files <- as.character(drop_dir(dropsc)$path_display)
+  # }
+  data <- read.csv("/Users/jhmoxley/Dropbox (MBA)/FinID_curator/scratch/betaMaster_df.csv")
+  
   
   #read in data, all character classes
-  data <- lapply(files, drop_read_csv, stringsAsFactors = F, 
-                 as.is = T, colClasses = "character")
-  data <- dplyr::bind_rows(data)
+  # data <- lapply(files, drop_read_csv, stringsAsFactors = F, 
+  #                as.is = T, colClasses = "character")
+  # data <- dplyr::bind_rows(data)
   
   #delete column for radio button approach??
   # del <- matrix(as.character(1), nrow = nrow(data), ncol = 1, byrow =T, 
