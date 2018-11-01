@@ -14,6 +14,7 @@ library(leaflet.extras)
 dropdd <- "FinID_curator/archive"
 dropsc <- "FinID_curator/scratch"
 dropfin <- "FinID_curator/FinIDs_staging"
+droppar <- "FinID_curator/FinIDs_parent"
 token <- readRDS("droptoken.rds") 
 
 #list of observers available to checkbox
@@ -24,7 +25,8 @@ flds <- list(
   coords = list(matrix(c(-123.00, 38.24), nrow=1), #Tomales station
                  matrix(c(-123.00, 37.69), nrow=1), #MiroungaBay station
                  matrix(c(-122.34, 37.11), nrow=1), #Ano tation
-                 matrix(c(-121.93, 36.97), nrow=1))
+                 matrix(c(-121.93, 36.97), nrow=1)),
+  exists = tools::file_path_sans_ext(drop_dir(droppar)$name)
 )
 names(flds$coords) <- flds$sites
 
@@ -61,25 +63,26 @@ loadData <- function(dir) {
 loadData2 <- function(phid.only = NULL) {
   #survey.only takes a phid & subsets files to that survey
   #get list of files
-  # if(!is.null(phid.only)){
-  #   #extract only files w/in the survey
-  #   files <- as.character(drop_dir(dropsc)$path_display)[
-  #     grepl(substr(phid.only, 0, nchar(phid.only)-2), 
-  #           as.character(drop_dir(dropsc)$path_display))]
-  # }else{
-  #   files <- as.character(drop_dir(dropsc)$path_display)
-  # }
-  data <- read.csv("/Users/jhmoxley/Dropbox (MBA)/FinID_curator/scratch/betaMaster_df.csv")
+  if(!is.null(phid.only)){
+    #extract only files w/in the survey
+    files <- as.character(drop_dir(dropsc)$path_display)[
+      grepl(substr(phid.only, 0, nchar(phid.only)-2),
+            as.character(drop_dir(dropsc)$path_display))]
+  }else{
+    files <- as.character(drop_dir(dropsc)$path_display)
+  }
+  ##hard-coded for IT demo
+  #data <- read.csv("/Users/jhmoxley/Dropbox (MBA)/FinID_curator/scratch/betaMaster_df.csv")
   
   
   #read in data, all character classes
-  # data <- lapply(files, drop_read_csv, stringsAsFactors = F, 
-  #                as.is = T, colClasses = "character")
-  # data <- dplyr::bind_rows(data)
-  
+  data <- lapply(files, drop_read_csv, stringsAsFactors = F,
+                  as.is = T, colClasses = "character")
+  data <- dplyr::bind_rows(data)
+
   #delete column for radio button approach??
-  # del <- matrix(as.character(1), nrow = nrow(data), ncol = 1, byrow =T, 
-  #               dimnames = list(data$PhotoID))
+  del <- matrix(as.character(1), nrow = nrow(data), ncol = 1, byrow =T,
+               dimnames = list(data$PhotoID))
   data
 }
 

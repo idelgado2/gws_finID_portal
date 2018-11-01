@@ -167,7 +167,12 @@
     ##Page 2 server stuff
     
     #data gatekeeper, fields can be entered once PhotoID & file exists
+    #phid <- reactiveValues()
     phid <- reactiveValues()
+    exists <- c(flds$exists, #existing photo ids in parent dir
+                tools::file_path_sans_ext(drop_dir(dropfin)$name) #phids in staging dir needing to be input
+                )
+    print("i got hre")
     finUP <- reactive({
       if(is.null(input$fin.photo)){
         return(NULL)
@@ -176,17 +181,28 @@
         cat("the datapath currently is", file.exists(input$fin.photo$datapath), "\n")
         re1 <- reactive({gsub("\\\\","/", input$fin.photo$datapath)})
         output$FinShot <- renderImage({list(src = re1())}, deleteFile = FALSE)
-        #make id
-        phid$val <- paste0(toupper(input$site.phid),
-                           format(input$date.phid, "%y%m%d"),
-                           ifelse(nchar(input$sighting.phid==1),
-                                  paste0("0", input$sighting.phid),
-                                  input$sighting.phid))
         
-        output$PhotoID <- renderText({paste(HTML("<font color=\"#FF0000\"><b>PHOTO ID<font color=\"#000000\"></b> assigned as: "), 
+        #make id, check dupes
+        #make a dummy
+        phid$dummy <- paste0(toupper(input$site.phid),
+                                    format(input$date.phid, "%y%m%d"),
+                                    ifelse(nchar(input$sighting.phid==1),
+                                           paste0("0", input$sighting.phid),
+                                           input$sighting.phid))
+        #check the dummy against dupes, PRESS it
+        phid$val <- ifelse(phid$dummy %in% exists, NA, phid$dummy)
+        
+        #press the phid to an output obj 
+        output$PhotoID <- renderText({
+          #check dupes
+          validate(
+            need(!is.na(phid$val), paste(HTML("<font color=\"#FF0000\"><b>PHOTOID ALREADY EXISTS!!!!!!!</b>")))
+          )
+          paste(HTML("<font color=\"#FF0000\"><b>PHOTO ID<font color=\"#000000\"></b> assigned as: "), 
                                             HTML(paste0("<font color=\"#FF0000\"><b>",
                                                         phid$val,
-                                                        "</b>")))})
+                                                        "</b>")))
+          })
         # output$PhotoID <- renderText({paste0(toupper(input$site.phid),
         #                                      format(input$date.phid, "%y%m%d"),
         #                                      ifelse(nchar(input$sighting.phid==1),
@@ -227,11 +243,21 @@
       }
     })
     output$finuploaded <- reactive({
+      #check dupes
+      # validate(
+      #   need(!is.null(phid$val), "ISSUES BRO"),
+      #   need(!is.null(finUP()), "ISSUES BRO"),
+      #   need(grepl("^([A-Z]{2,3})([0-9]{8})", phid$val), "ISSUES BRO")
+      # )
       #hide the data entry tbl until essential info is included
-      return(!is.null(finUP()) && grepl("^([A-Z]{2,3})([0-9]{8})", phid$val))
+      return(!is.null(finUP()) && !is.na(phid$val) && grepl("^([A-Z]{2,3})([0-9]{8})", phid$val))
+      #return(TRUE)
       #!is.na(input$sighting.phid))
     })
-    outputOptions(output, 'finuploaded', suspendWhenHidden=F)
+    
+    #reactive({
+      outputOptions(output, 'finuploaded', suspendWhenHidden=F)
+   #)}
     
     output$dataentry <- DT::renderDataTable(
       formData(),
@@ -240,10 +266,6 @@
                      columnDefs=list(
                        list(visible = F, targets = c(14:17))))
       )
-      
-   
-      
-      
     
     #submit buttons only if fields are filled, theres a photo, & proper photoID
     observe({
