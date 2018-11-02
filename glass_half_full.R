@@ -5,8 +5,8 @@ library(magrittr)
 ui =pageWithSidebar(
   headerPanel("Take our quiz to find out if you're an optimist or pessimist"),
   sidebarPanel(
-    sliderInput(inputId = "Full", label = "% water", min = 0, max = 1, value = 0.2),
-    sliderInput(inputId = "Empty", label = "% air", min = 0, max = 1, value = 1 - 0.2),
+    sliderInput(inputId = "Full", label = "% water", min = 0, max = 1, value = 0.31),
+    sliderInput(inputId = "Empty", label = "% air", min = 0, max = 1, value = 1 - 0.31),
     uiOutput("Empty")),
   mainPanel(
     plotOutput("glass")

@@ -368,6 +368,7 @@
                   pFn = file.path(dropfin, paste0(phid$val, 
                                                   ".", 
                                                   tools::file_ext(input$fin.photo$datapath))),
+                  survey.vessel = as.character(input$vessel),
                   survey.crew = as.character(paste(input$crew, collapse = "|")),
                   # survey.effortON = as.character(input$effort.on), #w/o slider range
                   # survey.effortOFF = as.character(input$effort.off),
@@ -386,8 +387,9 @@
     ##Button doing stuff
     #attempt here to develop ability to load data prior to clicking over to page 3
     dB <- reactiveValues()
-    dropdB <- reactive({loadData2(phid.only = phid$val, token = token)})
+    #dropdB <- reactive({loadData2(phid.only = phid$val, token = token)})
     
+    ###THIS SHOULD ONLY LOAD DATA FROM THAT DAY
     #update page 3 from the get go
     output$finsTable <- DT::renderDataTable(
       loadData2(),
@@ -468,7 +470,9 @@
     
     ##actions once data can be stored
     observeEvent(input$SAVEDATA,{
-      
+        #needs a way to only grab a single day of data
+        #loadData2 has phid.only param
+        saveLog(data, site = input$site, date = input$date)
     })
     
   }

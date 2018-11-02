@@ -15,6 +15,7 @@ dropdd <- "FinID_curator/archive"
 dropsc <- "FinID_curator/scratch"
 dropfin <- "FinID_curator/FinIDs_staging"
 droppar <- "FinID_curator/FinIDs_parent"
+log <- "/Users/jmoxley/Dropbox (MBA)/FinID_curator/finID_SurveyLog.csv"
 token <- readRDS("droptoken.rds") 
 
 #list of observers available to checkbox
@@ -132,6 +133,20 @@ saveData2 <- function(data) {
   drop_upload(tempPath, path = dropsc, mode = "add")
 }
 
+#siphon off survey data into a log of all surveys completed
+saveLog <- function(data, site, date){
+  #data <- loadData2(phid.only = phid$val)
+  #hard code due to rdrop2 erros
+  files <- list.files("/Users/jmoxley/Dropbox (MBA)/FinID_curator/scratch", 
+                      full.names = T)[
+    grepl(paste0(site, format(date, "%y%m%d")), #find files w/ same date/site
+          list.files("/Users/jmoxley/Dropbox (MBA)/FinID_curator/scratch"))]
+  
+  #do i need some qc chk that data matches? 
+  dat <- read.csv(files[sample(1:length(files), 1)])
+  logdat <- read.csv(file = log)
+  write.table(dat, file = file.path())
+}
 
 #save photo uploads w/ photoID
 #dropbox style
