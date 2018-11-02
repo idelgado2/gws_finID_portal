@@ -35,13 +35,17 @@
              ),
              mainPanel(
                #outputs for tab 1
-               sliderInput("effort.on", "On Effort?", 
-                           value = 8, min = 4, max = 20, step = 0.5),
-               sliderInput("effort.off", "Off Effort?",
-                           value = 15, min = 4, max = 20, step = 0.5),
+               # sliderInput("effort.on", "On Effort?", 
+               #             value = 8, min = 4, max = 20, step = 0.5),
+               # sliderInput("effort.off", "Off Effort?",
+               #             value = 15, min = 4, 
+               #             max = 20, step = 0.5),
+               sliderInput("effort", "Start/Stop of Survey Effort?", 
+                           min = 6, max = 20, value = c(8, 15)),
                textInput("notes.survey", "Notes from survey day", 
                          placeholder = "breaches? predations?", width = "100%"),
-               textOutput("crew")
+               textOutput("crew"),
+               actionButton("addfins", "Ready to add Fins?", class="btn-primary")
                
              )
     ),
@@ -51,6 +55,7 @@
     ################
     tabPanel("Fin Photo Entry",
              shinyjs::inlineCSS(appCSS),
+             
              sidebarPanel(
                
                #PhotoID fields first
@@ -97,6 +102,7 @@
                
                
              ), 
+             
              mainPanel(useShinyjs(),
                        uiOutput("site.phid"),
                        uiOutput("date.phid"),
@@ -162,17 +168,26 @@
                                                      as.Date(input$date.phid, format = "%m-%d-%Y"),
                                                      "</b>")))})
     
+    
+    #make off effort depend on effort (can't be before on effort)
+    # observe(input$effort.off <= input$effort.on,{
+    #   updateSliderInput(session, "effort.off", value = input$effort.on + 0.5)
+    # })
+    
     ######################
     ######################
     ##Page 2 server stuff
     
     #data gatekeeper, fields can be entered once PhotoID & file exists
-    #phid <- reactiveValues()
+    #data can't be pressed into a csv file until conditions are met
+    ######################
+    #ALL THINGS PHOTO ID STAMP HAPPEN HERE
+    ######################
     phid <- reactiveValues()
     exists <- c(flds$exists, #existing photo ids in parent dir
                 tools::file_path_sans_ext(drop_dir(dropfin)$name) #phids in staging dir needing to be input
                 )
-    print("i got hre")
+    
     finUP <- reactive({
       if(is.null(input$fin.photo)){
         return(NULL)
@@ -196,13 +211,14 @@
         output$PhotoID <- renderText({
           #check dupes
           validate(
-            need(!is.na(phid$val), paste(HTML("<font color=\"#FF0000\"><b>PHOTOID ALREADY EXISTS!!!!!!!</b>")))
+            need(!is.na(phid$val), "PHOTOID ALREADY EXISTS!!!!!!! MAKE A CHANGE")
           )
           paste(HTML("<font color=\"#FF0000\"><b>PHOTO ID<font color=\"#000000\"></b> assigned as: "), 
                                             HTML(paste0("<font color=\"#FF0000\"><b>",
                                                         phid$val,
                                                         "</b>")))
           })
+        
         # output$PhotoID <- renderText({paste0(toupper(input$site.phid),
         #                                      format(input$date.phid, "%y%m%d"),
         #                                      ifelse(nchar(input$sighting.phid==1),
@@ -242,22 +258,12 @@
         
       }
     })
+    #####################
     output$finuploaded <- reactive({
-      #check dupes
-      # validate(
-      #   need(!is.null(phid$val), "ISSUES BRO"),
-      #   need(!is.null(finUP()), "ISSUES BRO"),
-      #   need(grepl("^([A-Z]{2,3})([0-9]{8})", phid$val), "ISSUES BRO")
-      # )
       #hide the data entry tbl until essential info is included
       return(!is.null(finUP()) && !is.na(phid$val) && grepl("^([A-Z]{2,3})([0-9]{8})", phid$val))
-      #return(TRUE)
-      #!is.na(input$sighting.phid))
     })
-    
-    #reactive({
-      outputOptions(output, 'finuploaded', suspendWhenHidden=F)
-   #)}
+    outputOptions(output, 'finuploaded', suspendWhenHidden=F)
     
     output$dataentry <- DT::renderDataTable(
       formData(),
@@ -363,8 +369,10 @@
                                                   ".", 
                                                   tools::file_ext(input$fin.photo$datapath))),
                   survey.crew = as.character(paste(input$crew, collapse = "|")),
-                  survey.effortON = as.character(input$effort.on),
-                  survey.effortOFF = as.character(input$effort.off),
+                  # survey.effortON = as.character(input$effort.on), #w/o slider range
+                  # survey.effortOFF = as.character(input$effort.off),
+                  survey.effortON = as.character(input$effort[1]), #w/ slider range
+                  survey.effortOFF = as.character(input$effort[2]),
                   survey.notes = as.character(input$survey.notes)
         )
         data <- t(data)
@@ -394,6 +402,10 @@
         cat('These rows were selected:\n\n')
         cat(s, sep = ', ')
       }
+    })
+    
+    observeEvent(input$addfins, {
+      updateTabsetPanel(session, "form", selected = "Fin Photo Entry")
     })
     
     #Observe "mas fins" event here
