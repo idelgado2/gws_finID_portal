@@ -64,28 +64,36 @@ loadData <- function(dir) {
 loadData2 <- function(phid.only = NULL) {
   #survey.only takes a phid & subsets files to that survey
   #get list of files
+  #list the directory
+  dir <- drop_dir(dropsc)
+  #list files 
+  files <- as.character(dir$path_display)[
+    grepl(pattern="^(CCA_GWS_PHID)", dir$name)]
   if(!is.null(phid.only)){
-    #extract only files w/in the survey
-    files <- as.character(drop_dir(dropsc)$path_display)[
+    #extract only files w/in the survey date
+    
+    #PHID CHK HERE? NEEDS A FUNCTION
+    
+    files <- as.character(files)[
       grepl(substr(phid.only, 0, nchar(phid.only)-2),
-            as.character(drop_dir(dropsc)$path_display))]
-  }else{
-    files <- as.character(drop_dir(dropsc)$path_display)
-  }
+            as.character(files))]
+    }
   ##hard-coded for IT demo
   #data <- read.csv("/Users/jhmoxley/Dropbox (MBA)/FinID_curator/scratch/betaMaster_df.csv")
-  
   
   #read in data, all character classes
   data <- lapply(files, drop_read_csv, stringsAsFactors = F,
                   as.is = T, colClasses = "character")
   data <- dplyr::bind_rows(data)
-
+  
+  print("oooo wow all the way here")
   #delete column for radio button approach??
   del <- matrix(as.character(1), nrow = nrow(data), ncol = 1, byrow =T,
                dimnames = list(data$PhotoID))
   data
 }
+
+
 
 #ban phids returns a vector of phids existing w/in the folders that cannot be duplicated
 getExistingPhids <- function(all=F){

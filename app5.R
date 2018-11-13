@@ -393,6 +393,7 @@
     #update page 3 from the get go
     output$finsTable <- DT::renderDataTable(
       loadData2(),
+      ##maybe ok to not have phid.only approach??
       rownames = F, options=list(searching=F, lengthChange=F, paging =F),
       server = T, editable = T
     )
@@ -466,6 +467,8 @@
         shinyjs::click("masfins")})
       #move user to submission page
       updateTabsetPanel(session, "form", selected = "Data Submission")
+      
+      
     })
     
     ##actions once data can be stored
