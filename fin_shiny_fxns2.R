@@ -61,7 +61,7 @@ loadData <- function(dir) {
   data
 }
 #dropbox load
-loadData2 <- function(phid.only = NULL) {
+loadData2 <- function(phid.only = NULL, delete = F) {
   #survey.only takes a phid & subsets files to that survey
   #get list of files
   #list the directory
@@ -72,8 +72,11 @@ loadData2 <- function(phid.only = NULL) {
   if(!is.null(phid.only)){
     #extract only files w/in the survey date
     
-    #PHID CHK HERE? NEEDS A FUNCTION
+    ###
+    #PHID CHK HERE? NEEDS A FUNCTION to trap errors
+    ###
     
+    #ideally have something w/o shark sighting #, i.e., when just input site/date are known? 
     files <- as.character(files)[
       grepl(substr(phid.only, 0, nchar(phid.only)-2),
             as.character(files))]
@@ -87,9 +90,11 @@ loadData2 <- function(phid.only = NULL) {
   data <- dplyr::bind_rows(data)
   
   print("oooo wow all the way here")
-  #delete column for radio button approach??
-  del <- matrix(as.character(1), nrow = nrow(data), ncol = 1, byrow =T,
-               dimnames = list(data$PhotoID))
+  #delete column for radio button appdroach??
+  if(delete == T){
+    sc <- data.frame(delete = as.character(1), data)
+  }
+  
   data
 }
 

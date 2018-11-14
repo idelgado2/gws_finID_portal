@@ -270,7 +270,7 @@
       rownames = FALSE,
       options = list(searching = FALSE, lengthChange = FALSE,
                      columnDefs=list(
-                       list(visible = F, targets = c(14:17))))
+                       list(visible = F, targets = c(14:17)))),
       )
     
     #submit buttons only if fields are filled, theres a photo, & proper photoID
@@ -391,10 +391,15 @@
     
     ###THIS SHOULD ONLY LOAD DATA FROM THAT DAY
     #update page 3 from the get go
+    
     output$finsTable <- DT::renderDataTable(
-      loadData2(),
+      loadData2(#delete = T
+                ),
       ##maybe ok to not have phid.only approach??
-      rownames = F, options=list(searching=F, lengthChange=F, paging =F),
+      rownames = F, options=list(searching=F, lengthChange=F, paging=F,
+                                 columnDefs = list(list(visible = F, 
+                                  #hide refID/name, site/date/#, tag.side/y-n.biopsy, user/lat/lon/timestamp/dfn/pfn
+                                                   targets = c(1:2,6:8,14:15, 19:24)-1))),
       server = T, editable = T
     )
     #messaging of rows selected for deletion
