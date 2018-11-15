@@ -61,7 +61,7 @@ loadData <- function(dir) {
   data
 }
 #dropbox load
-loadData2 <- function(phid.only = NULL, delete = F) {
+loadData2 <- function(phid.only = NULL, dt.filt = "2018-10-21", loc.filt = "PR") {
   #survey.only takes a phid & subsets files to that survey
   #get list of files
   #list the directory
@@ -91,9 +91,9 @@ loadData2 <- function(phid.only = NULL, delete = F) {
   
   print("oooo wow all the way here")
   #delete column for radio button appdroach??
-  if(delete == T){
-    sc <- data.frame(delete = as.character(1), data)
-  }
+  # if(delete == T){
+  #   sc <- data.frame(delete = as.character(1), data)
+  # }
   
   data
 }

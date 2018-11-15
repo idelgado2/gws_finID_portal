@@ -133,9 +133,15 @@
              # ),
              fluidPage(
                verbatimTextOutput('x4'),
+               selectInput("review", label = "select data for submission",
+                           choices = drop_dir(dropsc)$name, selected = NULL),
                checkboxInput("reviewed", 
                              label = "I HAVE VERIFIED THE DATA", 
                              value = F),
+               #create list of site/date combos avail for review
+               # selectInput("dat.rev", label = "Select data to review",
+               #             choices = flds$sites, selected = uiOutput("site.phid")),
+               
                #display data
                DT::dataTableOutput("finsTable"),
                
@@ -199,6 +205,8 @@
         
         #make id, check dupes
         #make a dummy
+        phid$site <- input$site.phid
+        phid$date <- input$date.phid
         phid$dummy <- paste0(toupper(input$site.phid),
                                     format(input$date.phid, "%y%m%d"),
                                     ifelse(nchar(input$sighting.phid==1),
@@ -270,7 +278,7 @@
       rownames = FALSE,
       options = list(searching = FALSE, lengthChange = FALSE,
                      columnDefs=list(
-                       list(visible = F, targets = c(14:17)))),
+                       list(visible = F, targets = c(14:17))))
       )
     
     #submit buttons only if fields are filled, theres a photo, & proper photoID
@@ -294,7 +302,6 @@
     #build data frame, needs to become reactive
     #output$reviewed <- renderText({input$reviewed})
     #can we make this load sooner?? 
-    
     
     output$reviewed <- renderUI({
       if(input$reviewed == T){
@@ -391,9 +398,10 @@
     
     ###THIS SHOULD ONLY LOAD DATA FROM THAT DAY
     #update page 3 from the get go
+    #filtering input for reviewing data over different days
     
     output$finsTable <- DT::renderDataTable(
-      loadData2(#delete = T
+      loadData2(
                 ),
       ##maybe ok to not have phid.only approach??
       rownames = F, options=list(searching=F, lengthChange=F, paging=F,
