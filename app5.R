@@ -190,9 +190,12 @@
     #ALL THINGS PHOTO ID STAMP HAPPEN HERE
     ######################
     phid <- reactiveValues()
-    exists <- c(flds$exists, #existing photo ids in parent dir
-                tools::file_path_sans_ext(drop_dir(dropfin)$name) #phids in staging dir needing to be input
-                )
+    # exists <- c(flds$exists, #existing photo ids in parent dir
+    #             tools::file_path_sans_ext(drop_dir(dropfin)$name) #phids in staging dir needing to be input
+    #             )
+    exists <- reactiveValues()
+    exists$phids <- c(tools::file_path_sans_ext(drop_dir(droppar)$name),
+                      tools::file_path_sans_ext(drop_dir(dropfin)$name))
     
     finUP <- reactive({
       if(is.null(input$fin.photo)){
@@ -213,7 +216,7 @@
                                            paste0("0", input$sighting.phid),
                                            input$sighting.phid))
         #check the dummy against dupes, PRESS it
-        phid$val <- ifelse(phid$dummy %in% exists, NA, phid$dummy)
+        phid$val <- ifelse(phid$dummy %in% exists$phids, NA, phid$dummy)
         
         #press the phid to an output obj 
         output$PhotoID <- renderText({
@@ -267,6 +270,7 @@
       }
     })
     #####################
+    
     output$finuploaded <- reactive({
       #hide the data entry tbl until essential info is included
       return(!is.null(finUP()) && !is.na(phid$val) && grepl("^([A-Z]{2,3})([0-9]{8})", phid$val))
@@ -393,7 +397,9 @@
     ######################
     ##Button doing stuff
     #attempt here to develop ability to load data prior to clicking over to page 3
-    dB <- reactiveValues()
+    # dB <- reactiveValues(
+    #   grep(getExistingPhids(all=F,paths=F), 
+    # )
     #dropdB <- reactive({loadData2(phid.only = phid$val, token = token)})
     
     ###THIS SHOULD ONLY LOAD DATA FROM THAT DAY

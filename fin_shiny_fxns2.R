@@ -23,11 +23,11 @@ flds <- list(
   observers = c("PK", "SA", "SJ", "JM", "TC", "TW", "EM", "OJ"),
   sites = c("PR", "FAR", "AN", "APT"),
   mandatory = c("user", "sex", "size"),
+  #exists = c(tools::file_path_sans_ext(drop_dir(droppar)$name),
   coords = list(matrix(c(-123.00, 38.24), nrow=1), #Tomales station
                  matrix(c(-123.00, 37.69), nrow=1), #MiroungaBay station
                  matrix(c(-122.34, 37.11), nrow=1), #Ano tation
-                 matrix(c(-121.93, 36.97), nrow=1)),
-  exists = tools::file_path_sans_ext(drop_dir(droppar)$name)
+                 matrix(c(-121.93, 36.97), nrow=1))
 )
 names(flds$coords) <- flds$sites
 
@@ -101,14 +101,39 @@ loadData2 <- function(phid.only = NULL, dt.filt = "2018-10-21", loc.filt = "PR")
 
 
 #ban phids returns a vector of phids existing w/in the folders that cannot be duplicated
-getExistingPhids <- function(all=F){
-  if(is.null(dir)){
-    #get them everywhere
-    files <- c(drop_dir(dropsc), 
-               drop_dir(dropfin))
+getExistingPhids <- function(all=F, paths=F){
+  #all=T if want from both scratch & catalog
+  #names = F if want the directory contets
+  if(all == T){
+    #get them from scratch & catalog bins
+    if(paths == T){
+      files <- c(drop_dir(dropsc)$path_display[
+        #only get properly named
+        grepl(pattern="^(CCA_GWS_PHID)", drop_dir(dropsc)$name)],
+        drop_dir(dropfin)$path_display, 
+        drop_dir(droppar)$path_display)
+    }else{
+      files <- c(drop_dir(dropsc)$name[
+        #only get properly named
+        grepl(pattern="^(CCA_GWS_PHID)", drop_dir(dropsc)$name)],
+        drop_dir(dropfin)$name, 
+        drop_dir(droppar)$name)
+    }
   }else{
-    files <- drop_dir(dir)
+    if(paths == T){
+      files <- c(drop_dir(dropsc)$path_display[
+        #only get properly named
+        grepl(pattern="^(CCA_GWS_PHID)", drop_dir(dropsc)$name)],
+        drop_dir(dropfin)$path_display)
+    }else{
+      files <- c(drop_dir(dropsc)$name[
+        #only get properly named
+        grepl(pattern="^(CCA_GWS_PHID)", drop_dir(dropsc)$name)],
+        drop_dir(dropfin)$name)
+    }
   }
+   
+  return(files) 
 }
 
 ############
