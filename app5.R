@@ -428,8 +428,7 @@
       options=list(searching=F, lengthChange=F, paging=F,
                                  columnDefs = list(list(visible = F, 
                                   #hide refID/name, site/date/#, tag.side/y-n.biopsy, user/lat/lon/timestamp/dfn/pfn
-                                                   targets = c(1:2,6:8,14:15, 19:24)-1))),
-      
+                                                   targets = c(1:2,6:8,14:15, 19:24)-1)))
       
     )
     #messaging of rows selected for deletion
