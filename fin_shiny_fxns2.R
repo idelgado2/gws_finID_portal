@@ -7,6 +7,7 @@ require(shinyjs)
 require(rdrop2)
 library(leaflet)
 library(leaflet.extras)
+library(tidyverse)
 
 
 #dirs
@@ -61,33 +62,42 @@ loadData <- function(dir) {
   data
 }
 #dropbox load
-loadData2 <- function(phid.only = NULL, dt.filt = "2018-10-21", loc.filt = "PR") {
+loadData2 <- function(dt.filt = NULL, loc.filt = NULL) {
   #survey.only takes a phid & subsets files to that survey
   #get list of files
   #list the directory
+  print("ooo hellooo")
   dir <- drop_dir(dropsc)
   #list files 
   files <- as.character(dir$path_display)[
     grepl(pattern="^(CCA_GWS_PHID)", dir$name)]
-  if(!is.null(phid.only)){
-    #extract only files w/in the survey date
-    
-    ###
-    #PHID CHK HERE? NEEDS A FUNCTION to trap errors
-    ###
-    
-    #ideally have something w/o shark sighting #, i.e., when just input site/date are known? 
-    files <- as.character(files)[
-      grepl(substr(phid.only, 0, nchar(phid.only)-2),
-            as.character(files))]
-    }
+  #get metadata
+  files <- bind_cols(path = files, parse_phid(files))
+  print(dim(files))
+  print("yessara")
+  if(!is.null(loc.filt)){
+    #extract only files associated w/ selected survey
+    print("aiii not here")
+    print(loc.filt)
+    print(dt.filt)
+    files <- files %>% filter(loc == loc.filt)
+    print(dim(files))
+  }
+  if(!is.null(dt.filt)){
+    print('not here niehter')
+    print(dim(files))
+    files <- files %>% filter(date == dt.filt)
+    print(dim(files))
+  }
   ##hard-coded for IT demo
   #data <- read.csv("/Users/jhmoxley/Dropbox (MBA)/FinID_curator/scratch/betaMaster_df.csv")
-  
   #read in data, all character classes
-  data <- lapply(files, drop_read_csv, stringsAsFactors = F,
+  print("ohhh boy")
+  data <- lapply(files$path, drop_read_csv, stringsAsFactors = F,
                   as.is = T, colClasses = "character")
+  print('shit')
   data <- dplyr::bind_rows(data)
+  print("oooo even worse")
   
   print("oooo wow all the way here")
   #delete column for radio button appdroach??
@@ -95,13 +105,44 @@ loadData2 <- function(phid.only = NULL, dt.filt = "2018-10-21", loc.filt = "PR")
   #   sc <- data.frame(delete = as.character(1), data)
   # }
   
-  data
+  print(class(data))
+  print(nrow(data))
+  print(ncol(data))
+  return(data)
 }
 
-
+#parsing data from phids
+parse_phid <- function(ids){
+  require(stringr)
+  if(any(nchar(ids)>11)){
+    #if ids are longer than standard id (ie. pathways), extract just the phid
+    ids <- str_extract(ids, "([A-Z]{2,3})([0-9]){8}")
+  }
+  
+  id.dat <- data.frame(phid = ids) %>%            #convert to df for stringr tools
+    mutate(loc = as.vector(str_match(phid, "^[:alpha:]*")),
+           code = str_extract(phid, "[0-9]+"),
+           #8 digit #'s are stand eval; YYMMDD w/ 2 digi shark-du-jur#
+           yr = ifelse(nchar(code)==8, substr(code, 1,2), NA),
+           month = ifelse(nchar(code)==8, substr(code,3,4), NA),
+           day = ifelse(nchar(code)==8, substr(code,5,6), NA),
+           dujour = ifelse(nchar(code)==8, substr(code,7,8),NA))
+  #2yr evals seem common
+  id.dat$yr <- ifelse(nchar(id.dat$code)==2, id.dat$code, id.dat$yr)
+  id.dat$yr4 <- ifelse(as.numeric(id.dat$yr) > 80, 
+                       paste0("19", id.dat$yr), paste0("20", id.dat$yr))
+  #filter non standard naming
+  id.dat$loc <- ifelse(id.dat$loc %in% flds$sites, id.dat$loc, NA)
+  
+  #make dates
+  id.dat<- id.dat %>% mutate(date = as.Date(
+    paste(yr4, month, day, sep = "/"), format = "%Y/%m/%d"))
+  
+  return(id.dat)
+}
 
 #ban phids returns a vector of phids existing w/in the folders that cannot be duplicated
-getExistingPhids <- function(all=F, paths=F){
+getExistingPhids <- function(all=F, paths=F, data.only = F){
   #all=T if want from both scratch & catalog
   #names = F if want the directory contets
   if(all == T){
@@ -121,15 +162,27 @@ getExistingPhids <- function(all=F, paths=F){
     }
   }else{
     if(paths == T){
-      files <- c(drop_dir(dropsc)$path_display[
-        #only get properly named
-        grepl(pattern="^(CCA_GWS_PHID)", drop_dir(dropsc)$name)],
-        drop_dir(dropfin)$path_display)
+      if(data.only == T){
+        files <- drop_dir(dropsc)$path_display[
+          #only get properly named
+          grepl(pattern="^(CCA_GWS_PHID)", drop_dir(dropsc)$name)]
+      }else{
+        files <- c(drop_dir(dropsc)$path_display[
+          #only get properly named
+          grepl(pattern="^(CCA_GWS_PHID)", drop_dir(dropsc)$name)],
+          drop_dir(dropfin)$path_display)
+      }
     }else{
-      files <- c(drop_dir(dropsc)$name[
-        #only get properly named
-        grepl(pattern="^(CCA_GWS_PHID)", drop_dir(dropsc)$name)],
-        drop_dir(dropfin)$name)
+      if(data.only == T){
+        files <- drop_dir(dropsc)$name[
+          #only get properly named
+          grepl(pattern="^(CCA_GWS_PHID)", drop_dir(dropsc)$name)]
+      }else{
+        files <- c(drop_dir(dropsc)$name[
+          #only get properly named
+          grepl(pattern="^(CCA_GWS_PHID)", drop_dir(dropsc)$name)],
+          drop_dir(dropfin)$name)
+      }
     }
   }
    

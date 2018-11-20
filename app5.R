@@ -133,14 +133,14 @@
              # ),
              fluidPage(
                verbatimTextOutput('x4'),
-               selectInput("review", label = "select data for submission",
-                           choices = drop_dir(dropsc)$name, selected = NULL),
+               #create list of site/date combos avail for review
+               uiOutput("for.review"),
+               # selectInput("review", label = "Select data for submission",
+               #             choices = drop_dir(dropsc)$name, selected = NULL),
                checkboxInput("reviewed", 
                              label = "I HAVE VERIFIED THE DATA", 
                              value = F),
-               #create list of site/date combos avail for review
-               # selectInput("dat.rev", label = "Select data to review",
-               #             choices = flds$sites, selected = uiOutput("site.phid")),
+               
                
                #display data
                DT::dataTableOutput("finsTable"),
@@ -190,13 +190,9 @@
     #ALL THINGS PHOTO ID STAMP HAPPEN HERE
     ######################
     phid <- reactiveValues()
-    # exists <- c(flds$exists, #existing photo ids in parent dir
-    #             tools::file_path_sans_ext(drop_dir(dropfin)$name) #phids in staging dir needing to be input
-    #             )
-    exists <- reactiveValues()
-    exists$phids <- c(tools::file_path_sans_ext(drop_dir(droppar)$name),
-                      tools::file_path_sans_ext(drop_dir(dropfin)$name))
-    
+    phid$exists <- tools::file_path_sans_ext(
+      getExistingPhids(all = T, paths = F))
+      
     finUP <- reactive({
       if(is.null(input$fin.photo)){
         return(NULL)
@@ -216,7 +212,7 @@
                                            paste0("0", input$sighting.phid),
                                            input$sighting.phid))
         #check the dummy against dupes, PRESS it
-        phid$val <- ifelse(phid$dummy %in% exists$phids, NA, phid$dummy)
+        phid$val <- ifelse(phid$dummy %in% phid$exists, NA, phid$dummy)
         
         #press the phid to an output obj 
         output$PhotoID <- renderText({
@@ -396,25 +392,45 @@
     ######################
     ######################
     ##Button doing stuff
-    #attempt here to develop ability to load data prior to clicking over to page 3
-    # dB <- reactiveValues(
-    #   grep(getExistingPhids(all=F,paths=F), 
-    # )
-    #dropdB <- reactive({loadData2(phid.only = phid$val, token = token)})
+    #Find surveys available to submit & populate via unique dates/locs
+    #produce the selectInput for surveys available
+    output$for.review <- renderUI({
+      selectInput("for.review","Surveys available for review/submission",
+                  choices = survey.avail(), selected = NULL)
+    })
+    #parse out the answers
+    rev.loc <- reactive({
+      str_split(input$for.review, " ", simplify = T)[1]
+      })
+    rev.dt <- reactive({
+      str_split(input$for.review, " ", simplify = T)[2]
+    })
     
-    ###THIS SHOULD ONLY LOAD DATA FROM THAT DAY
-    #update page 3 from the get go
-    #filtering input for reviewing data over different days
+    #produce choices of surveys available for review/submission
+    survey.avail <- reactive({
+      phid.data <- bind_cols(
+                  parse_phid(getExistingPhids(all = F, paths = T, data.only = T)),
+                  #add path
+                  path = getExistingPhids(all = F, paths = T, data.only = T)
+                )
+      #get surveys that are staged
+      staged <- unique(paste(phid.data$loc, phid.data$date))
+      return(staged)
+    })
     
     output$finsTable <- DT::renderDataTable(
       loadData2(
-                ),
+        dt.filt = rev.dt(), loc.filt = rev.loc()
+        ),
       ##maybe ok to not have phid.only approach??
-      rownames = F, options=list(searching=F, lengthChange=F, paging=F,
+      rownames = F, server = T, editable = T,
+      extensions = "Buttons", 
+      options=list(searching=F, lengthChange=F, paging=F,
                                  columnDefs = list(list(visible = F, 
                                   #hide refID/name, site/date/#, tag.side/y-n.biopsy, user/lat/lon/timestamp/dfn/pfn
                                                    targets = c(1:2,6:8,14:15, 19:24)-1))),
-      server = T, editable = T
+      
+      
     )
     #messaging of rows selected for deletion
     output$x4 = renderPrint({
@@ -445,24 +461,6 @@
                        closeButton = F, type = "message", duration=9,
                        id = "phidUP")
       
-      #append to database for review
-      #dB <- dplyr::bind_rows(dB, data)
-      
-      #Page 3 Updates
-      # output$finsTable <- DT::renderDataTable(
-      #   #loadData2(),
-      #   dB,
-      #   rownames = F, options = list(searching=F, lengthChange=F)
-      # )
-      
-      #update pg 3 
-      # output$finsTable <- DT::renderDataTable(
-      #   loadData(dd),
-      #   rownames = FALSE,
-      #   options = list(searching = FALSE, lengthChange = FALSE)
-      # )
-      
-      
       #reset fields
       sapply(c("sighting", "sex", "size", "tag.exists", "tagdeployed", "tag.id",
                "tag.side", "biopsy", "biopsy.id", "notes", "tag.notes",
@@ -477,6 +475,7 @@
       reset("masfins")
       reset("r2submit")
     })
+    
     
     
     ##Somehow do something different 
