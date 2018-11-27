@@ -8,6 +8,7 @@ require(rdrop2)
 library(leaflet)
 library(leaflet.extras)
 library(tidyverse)
+library(shinyalert)
 
 
 #dirs

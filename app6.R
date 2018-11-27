@@ -132,6 +132,7 @@ shinyApp(ui = navbarPage(
            #   verbatimTextOutput('x4')
            # ),
            fluidPage(
+             useShinyalert(), 
              verbatimTextOutput('x4'),
              #create list of site/date combos avail for review
              uiOutput("for.review"),
@@ -226,6 +227,7 @@ server = function(input, output, session) {
                           "</b>")))
       })
       
+      
       # output$PhotoID <- renderText({paste0(toupper(input$site.phid),
       #                                      format(input$date.phid, "%y%m%d"),
       #                                      ifelse(nchar(input$sighting.phid==1),
@@ -278,8 +280,15 @@ server = function(input, output, session) {
     rownames = FALSE,
     options = list(searching = FALSE, lengthChange = FALSE,
                    columnDefs=list(
-                     list(visible = F, targets = c(14:17))))
+                     list(visible = F, targets = c(14:17)))),
+    Sys.sleep(2)
   )
+  
+  observeEvent("$('#dataentry').hasClass('recalculating')",{
+    shinyalert(title = "Fetching data", text = "Please wait for data to download",
+               closeOnEsc = T, closeOnClickOutside = T, timer = 5)
+  })
+                 
   
   #submit buttons only if fields are filled, theres a photo, & proper photoID
   observe({
@@ -417,11 +426,13 @@ server = function(input, output, session) {
     staged <- unique(paste(phid.data$loc, phid.data$date))
     return(staged)
   })
+  #wait for dB download alert
   
   output$finsTable <- DT::renderDataTable(
+
     data.frame(loadData2(
       dt.filt = rev.dt(), loc.filt = rev.loc()
-    ), delete = addCheckboxButtons),
+    )),
     ##maybe ok to not have phid.only approach??
     rownames = F, server = T, editable = T,
     options=list(searching=F, lengthChange=F, paging=F,
@@ -445,6 +456,7 @@ server = function(input, output, session) {
   observeEvent(input$addfins, {
     updateTabsetPanel(session, "form", selected = "Fin Photo Entry")
   })
+  
   
   #Observe "mas fins" event here
   observeEvent(input$masfins, {
