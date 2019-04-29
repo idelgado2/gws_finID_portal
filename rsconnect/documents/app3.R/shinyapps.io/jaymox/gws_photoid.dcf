@@ -1,0 +1,13 @@
+name: gws_photoid
+title: GWS_PhotoID
+username:
+account: jaymox
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 477872
+bundleId: 1621534
+url: https://jaymox.shinyapps.io/gws_photoid/
+when: 1538607466.73936
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app_basicdev.R|app2.R|CCA_GWSphid_PR_2018-09-28.csv|entry_app_dev.R|fin_shiny_fxns.R|shiny_forms_vign.R|entries/.DS_Store|entries/here_lies_data.csv|photos/here_lies_fins.png|photos/PR_09_ID_0050_26Sept.JPG

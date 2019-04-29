@@ -16,7 +16,7 @@ dropdd <- "FinID_curator/archive"
 dropsc <- "FinID_curator/scratch"
 dropfin <- "FinID_curator/FinIDs_staging"
 droppar <- "FinID_curator/FinIDs_parent"
-log <- "/Users/jmoxley/Dropbox (MBA)/FinID_curator/finID_SurveyLog.csv"
+log <- "FinID_curator/finID_SurveyLog.csv"
 token <- readRDS("droptoken.rds") 
 
 #list of observers available to checkbox
@@ -114,7 +114,7 @@ loadData2 <- function(dt.filt = NULL, loc.filt = NULL) {
 #parsing data from phids
 parse_phid <- function(ids){
   require(stringr)
-  if(any(nchar(ids)>11)){
+  if(any(nchar(ids)>11, na.rm = T)){
     #if ids are longer than standard id (ie. pathways), extract just the phid
     ids <- str_extract(ids, "([A-Z]{2,3})([0-9]){8}")
   }

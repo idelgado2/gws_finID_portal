@@ -72,7 +72,7 @@ shinyApp(ui = navbarPage(
              fileInput("fin.photo", labelMandatory("Upload fin here"), 
                        multiple = F, accept=c("image/jpeg", "image/png", "image/tiff",
                                               ".jpeg", ".jpg", ".png", ".tiff")),
-             textInput("time", labelMandatory("Time of Observation"), placeholder = "24HR CLOCK PLS (e.g., 0915 for 9:15"),
+             textInput("time", labelMandatory("Time of Observation"), placeholder = "24HR CLOCK PLS (e.g., 0915 for 9:15)"),
              hr(),
              selectInput("sex", labelMandatory("Sex (U if unknown)"), choices = c("M", "F", "U"), 
                          selectize = F, selected = "U"), 
@@ -421,7 +421,7 @@ server = function(input, output, session) {
   output$finsTable <- DT::renderDataTable(
     data.frame(loadData2(
       dt.filt = rev.dt(), loc.filt = rev.loc()
-    ), delete = addCheckboxButtons),
+    )),
     ##maybe ok to not have phid.only approach??
     rownames = F, server = T, editable = T,
     options=list(searching=F, lengthChange=F, paging=F,

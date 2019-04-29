@@ -1,0 +1,13 @@
+name: would_you_like_a_glass_of_water
+title: Would you like a glass of water?
+username:
+account: jaymox
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 549761
+bundleId: 1678767
+url: https://jaymox.shinyapps.io/would_you_like_a_glass_of_water/
+when: 1541178026.45038
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .httr-oauth|app_basicdev.R|app2.R|app3.R|app4.R|app5.R|CCA_GWS_PHID_FAR18102301_1540321571.csv|CCA_GWSphid_PR_2018-09-28.csv|droptoken.rds|entry_app_dev.R|fin_shiny_fxns.R|fin_shiny_fxns2.R|scratch scratch|shiny_forms_vign.R|beta_data/.DS_Store|beta_data/FinIDs_staging/.DS_Store|beta_data/FinIDs_staging/FAR18100401.jpeg|beta_data/FinIDs_staging/FAR18100402.jpg|beta_data/FinIDs_staging/FAR18100403.jpg|beta_data/FinIDs_staging/FAR18100404.JPG|beta_data/FinIDs_staging/FAR18100404.png|beta_data/FinIDs_staging/FAR18102301.jpeg|beta_data/FinIDs_staging/FAR18102302.jpg|beta_data/FinIDs_staging/FAR18102303.jpg|beta_data/FinIDs_staging/FAR18102304.JPG|beta_data/FinIDs_staging/FAR18102305.png|beta_data/FinIDs_staging/PR18100301.jpg|beta_data/FinIDs_staging/PR18100401.png|beta_data/FinIDs_staging/PR18102201.jpg|beta_data/FinIDs_staging/PR18102301.jpg|beta_data/FinIDs_staging/PR18102301.png|beta_data/scratch/.DS_Store|beta_data/scratch/CCA_GWS_PHID_FAR18102301_1540321571.csv|beta_data/scratch/CCA_GWS_PHID_FAR18102302_1540321612.csv|beta_data/scratch/CCA_GWS_PHID_FAR18102303_1540321672.csv|beta_data/scratch/CCA_GWS_PHID_FAR18102304_1540321719.csv|beta_data/scratch/CCA_GWS_PHID_FAR18102305_1540322005.csv|beta_data/scratch/CCA_GWS_PHID_PR18102201_1540322081.csv|beta_data/scratch/CCA_GWS_PHID_PR18102301_1540322131.csv|entries/.DS_Store|entries/here_lies_data.csv|photos/here_lies_fins.png|photos/PR_09_ID_0050_26Sept.JPG
