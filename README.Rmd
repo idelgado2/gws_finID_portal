@@ -8,7 +8,7 @@ output:
     keep_md: true
 ---
 # GWS FinID Portal
-# by Jerry Moxley
+### Jerry Moxley, 2018-19
 
 This repository includes the software development of a shiny-based data entry portal for cataloguing FinID photos for MBA white shark research.  The goal is to standardize the collection and stewardship of fin photos and associated metadata collected on shark surveys in central California.  In order to submit new sightings, a data record MUST contain a fin photo as well as survey location, date, sighting number, and (optionally) sex and size.  At the core of the standardization is distinguishing photoIDs from reference IDs.  A photoID (*phid* in code) is a fin observation collected from a photo or video that records an isolated, individual shark sighting.  The reference ID (*refID* in the code) is a curated list that encapsulates only the best photo of each individually-recognized shark and used in matching photoIDs to an individual's longitudinal record.  
 
