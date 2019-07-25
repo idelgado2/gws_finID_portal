@@ -18,6 +18,6 @@ shinyUI(
     tabPanel("Data Submission",
               sidebarPanel(),
               mainPanel()
-    ),
+    )
   )
 )
