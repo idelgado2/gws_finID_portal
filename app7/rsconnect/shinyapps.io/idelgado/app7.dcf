@@ -5,9 +5,8 @@ account: idelgado
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1051064
-bundleId: 2264679
+bundleId: 2264828
 url: https://idelgado.shinyapps.io/app7/
-when: 1564074982.55784
+when: 1564078158.01197
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: fin_shiny_fxns2.R
