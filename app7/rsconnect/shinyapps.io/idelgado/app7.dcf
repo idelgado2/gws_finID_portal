@@ -5,8 +5,8 @@ account: idelgado
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1051064
-bundleId: 2264828
+bundleId: 2264956
 url: https://idelgado.shinyapps.io/app7/
-when: 1564078158.01197
+when: 1564080755.97443
 asMultiple: FALSE
 asStatic: FALSE
