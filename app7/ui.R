@@ -18,7 +18,7 @@ shinyUI(
                   labelMandatory("Survey site"),
                   choices = flds$sites
                 ),
-                dataInput(
+                dateInput(
                   "date.phid",
                   labelMandatory("Survey date"),
                   value = Sys.Date(),
