@@ -2,6 +2,7 @@
 
 library(shiny)
 library(rsconnect)
+source("fin_shiny_fxns2.R")
 
 shinyUI(
   navbarPage(
