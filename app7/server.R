@@ -2,12 +2,13 @@
 
 library(shiny)
 library(rsconnect)
+source("fin_shiny_fxns2.R")
 shinyServer(
-  function(input, output){
+  function(input, output, session){
     setAccountInfo(name='idelgado',
                    token='B911B9733B6FCF8B67DCA5BF861A1AD9',
                    secret='itTB3/LHML67EOMxXkJkrqOLhD+L7w58wvaoqXvW')
-    output$site.phid = renderText(
+    output$site.phid = renderUI(
                           {paste(
                             HTML("<font color=\"#FF0000\"><b>SURVEY SITE<font color=\"#000000\"></b> assigned as: "),
                             HTML(
@@ -19,7 +20,7 @@ shinyServer(
                             )
                           )}
                       )
-    output$date.phid = renderText(
+    output$date.phid = renderUI(
                           {paste(
                             HTML("<font color=\"#FF0000\"><b>SURVEY DATE<font color=\"#000000\"></b> assigned as: "), 
                             HTML(
@@ -33,13 +34,13 @@ shinyServer(
                         )
 
     ##### action instruction for addFins button #####
-    #observeEvent(
-    #  input$addfins,
-    #    {updateTabsetPanel(
-    #    session,
-    #    "form",
-    #    selected = "Fin Photo Entry"
-    #    )}
-    #)            
+    observeEvent(
+      input$addfins,
+        {updateTabsetPanel(
+        session = session,
+        "form",
+        selected = "Fin Photo Entry"
+        )}
+    )            
   }
 )
