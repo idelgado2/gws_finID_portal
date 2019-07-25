@@ -7,8 +7,8 @@ shinyServer(
     setAccountInfo(name='idelgado',
                    token='B911B9733B6FCF8B67DCA5BF861A1AD9',
                    secret='itTB3/LHML67EOMxXkJkrqOLhD+L7w58wvaoqXvW')
-    output$site.phid = renderText({
-                          paste(
+    output$site.phid = renderText(
+                          {paste(
                             HTML("<font color=\"#FF0000\"><b>SURVEY SITE<font color=\"#000000\"></b> assigned as: "),
                             HTML(
                               paste0(
@@ -17,11 +17,10 @@ shinyServer(
                                 "<b>"
                               )
                             )
-                          )
-                        }
+                          )}
                       )
-    output$date.phid = renderText({
-                          paste(
+    output$date.phid = renderText(
+                          {paste(
                             HTML("<font color=\"#FF0000\"><b>SURVEY DATE<font color=\"#000000\"></b> assigned as: "), 
                             HTML(
                               paste0(
@@ -30,8 +29,17 @@ shinyServer(
                                 "</b>"
                               )
                             )
-                          )
-                        }
-                      )
+                          )}
+                        )
+
+    ##### action instruction for addFins button #####
+    #observeEvent(
+    #  input$addfins,
+    #    {updateTabsetPanel(
+    #    session,
+    #    "form",
+    #    selected = "Fin Photo Entry"
+    #    )}
+    #)            
   }
 )
