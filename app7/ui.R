@@ -5,7 +5,7 @@ library(rsconnect)
 
 shinyUI(
   fluidPage(
-    titlePanel(title = "Hello this is my first shiny app, Hello Shiny!"),
+    titlePanel(title = "Hello this is going to be the GroundUp shiny app"),
     sidebarLayout(
       sidebarPanel(h3("Enter personal information"),
                    textInput("name", h4("Enter Your Name"), ""),
