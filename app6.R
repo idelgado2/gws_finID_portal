@@ -202,7 +202,7 @@ server = function(input, output, session) {
     }else{
       #make fin photo
       cat("the datapath currently is", file.exists(input$fin.photo$datapath), "\n")
-      re1 <- reactive({gsub("\\\\","/", input$fin.photo$datapath)})
+      re1 <- reactive({gsub("\\\\","/", input$fin.photo$datapath)}) #remove any instaces of '\\\\' with '/'
       output$FinShot <- renderImage({list(src = re1())}, deleteFile = FALSE)
       
       #make id, check dupes
