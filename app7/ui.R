@@ -83,9 +83,9 @@ shinyUI(
                 #conditionalPanel()
               ),
               mainPanel(
-                useShinyjs()
-                #uiOutput("site.phid"),
-                #uiOutput("date.phid")
+                useShinyjs(),
+                uiOutput("siteOutput.phid"),
+                uiOutput("dateOutput.phid")
               )
     ),
     ###################

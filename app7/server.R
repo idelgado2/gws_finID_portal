@@ -8,30 +8,11 @@ shinyServer(
     setAccountInfo(name='idelgado',
                    token='B911B9733B6FCF8B67DCA5BF861A1AD9',
                    secret='itTB3/LHML67EOMxXkJkrqOLhD+L7w58wvaoqXvW')
-    output$site.phid = renderUI(
-                          {paste(
-                            HTML("<font color=\"#FF0000\"><b>SURVEY SITE<font color=\"#000000\"></b> assigned as: "),
-                            HTML(
-                              paste0(
-                                "<font color=\"#FF0000\"><b>",
-                                input$site.phid,
-                                "<b>"
-                              )
-                            )
-                          )}
-                      )
-    output$date.phid = renderUI(
-                          {paste(
-                            HTML("<font color=\"#FF0000\"><b>SURVEY DATE<font color=\"#000000\"></b> assigned as: "), 
-                            HTML(
-                              paste0(
-                                "<font color=\"#FF0000\"><b>",
-                                as.Date(input$date.phid, format = "%m-%d-%Y"),
-                                "</b>"
-                              )
-                            )
-                          )}
-                        )
+    
+    output$siteOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY SITE"), "assigned as: ", tags$span(style="color:red", input$site.phid)))
+    output$dateOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY DATE"), "assigned as: ", tags$span(style="color:red", as.Date(input$date.phid, format = "%m-%d-%Y"))))
+    
+    #renderUI(tags$h3("Hello There",tags$b("Isaac")))
 
     ##### action instruction for addFins button #####
     observeEvent(
