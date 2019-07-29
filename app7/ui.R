@@ -79,8 +79,13 @@ shinyUI(
                 hr(),
                 selectInput("sex", labelMandatory("Sex (U if unknown)"), choices = c("M", "F", "U"), selectize = F, selected = "U"), 
                 numericInput("size", labelMandatory("Size (in ft)"), value = NULL, min = 4, max = 20, step = 0.5),
-                hr()
-                #conditionalPanel()
+                hr(),
+                conditionalPanel(
+                  condition = "output.finuploaded",
+                  textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", width = "600px"),
+                  selectInput("tag.exists", "Tagged Already?", choices = c("U", "Y"), selected = "U"),
+                  selectInput("tagdeployed", "New Tag?", choices = c("None", "PAT", "Acoustic", "Stomach", "Clamp"), selected = "None")
+                )
               ),
               mainPanel(
                 useShinyjs(),
