@@ -3,7 +3,7 @@
 #update msg's, less buggy buttons, naming conflicts, & x/y leaflet
 #JHMoxley, 9/25/18
 
-##Wifi is moving slow, lets see if it dosent stall with this comment update##
+##second test, im on the network##
 
 source("fin_shiny_fxns2.R")
 #set up dropbox
