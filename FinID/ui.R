@@ -1,7 +1,6 @@
 ### This is the UI file for our groundUP file ###
 
 library(shiny)
-library(rsconnect)
 source("fin_shiny_fxns2.R")
 
 appCSS <- ".mandatory_star { color: red; }" #Red Star CSS for required inputs

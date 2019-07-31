@@ -1,7 +1,6 @@
 ### This is the SERVER file for our groundUP file ###
 
 library(shiny)
-library(rsconnect)
 source("fin_shiny_fxns2.R")
 shinyServer(
   function(input, output, session){
