@@ -12,7 +12,11 @@ shinyServer(
     output$siteOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY SITE"), "assigned as: ", tags$span(style="color:red", input$site.phid)))
     output$dateOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY DATE"), "assigned as: ", tags$span(style="color:red", as.Date(input$date.phid, format = "%m-%d-%Y"))))
     
-    #renderUI(tags$h3("Hello There",tags$b("Isaac")))
+    output$path = renderText({
+      inFile <- input$fin.photo
+      ifelse (is.null(inFile), return(NULL), return(inFile$datapath))
+    })
+    
 
     ##### action instruction for addFins button #####
     observeEvent(

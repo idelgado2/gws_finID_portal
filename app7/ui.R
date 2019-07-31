@@ -101,7 +101,8 @@ shinyUI(
               mainPanel(
                 useShinyjs(),
                 uiOutput("siteOutput.phid"),
-                uiOutput("dateOutput.phid")
+                uiOutput("dateOutput.phid"),
+                textOutput("path")
               )
     ),
     ###################
