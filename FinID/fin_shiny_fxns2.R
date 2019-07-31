@@ -7,7 +7,7 @@ require(rdrop2)
 library(leaflet)
 library(leaflet.extras)
 library(tidyverse)
-library(shinyalert)
+#library(shinyalert)
 
 #list of observers available to checkbox
 flds <- list(
