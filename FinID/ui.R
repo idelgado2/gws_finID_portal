@@ -101,7 +101,16 @@ shinyUI(
                 useShinyjs(),
                 uiOutput("siteOutput.phid"),
                 uiOutput("dateOutput.phid"),
-                textOutput("path")
+                textOutput("path"),
+                uiOutput("PhotoID"),
+                hr(),
+                conditionalPanel("output.finuploaded",
+                                 textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", width = "600px"),
+                                 imageOutput(outputId = "FinShot", width = "auto", height="auto"),
+                                 hr(),
+                                 uiOutput("xyloc"),
+                                 leafletOutput("map")
+                                )
               )
     ),
     ###################

@@ -20,6 +20,8 @@ flds <- list(
                  matrix(c(-121.93, 36.97), nrow=1))
 )
 
+names(flds$coords) <- flds$sites
+
 #add a red star next to mandatory fields
 labelMandatory <- function(label) {
   tagList(
