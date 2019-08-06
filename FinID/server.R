@@ -118,6 +118,53 @@ shinyServer(
         data
       }
     })
+################################################################################################
+    
+    observeEvent(input$masfins, {
+      data <- data.frame(formData(), stringsAsFactors = F)
+      showNotification(paste(data$dfN, "being uploaded to"), 
+                       #action = a(href="javascript:location.reload();", "Reload page"),
+                       closeButton = F, type = "message", duration=9,
+                       id = "datUP")
+      saveData(data)
+      
+      #savePhoto2(input$fin.photo, phid$val)
+      #showNotification(paste(phid$val, "photo uploaded to", dropfin), 
+                       #action = a(href="javascript:location.reload();", "Reload page"), 
+                       #closeButton = F, type = "message", duration=9,
+                       #id = "phidUP")
+      
+      #reset fields
+      #sapply(c("sighting", "sex", "size", "tag.exists", "tagdeployed", "tag.id",
+               #"tag.side", "biopsy", "biopsy.id", "notes", "tag.notes",
+               #"fin.photo", "PhotoID", "finuploaded", "match.sugg", "time", "FinShot"), 
+             #reset)
+      #output$FinShot <<- NULL
+      #output$dataentry <<- NULL
+      #output$PhotoID <<- NULL
+      #phid$val <<- NULL
+      
+      #reset("data")
+      #reset("masfins")
+      #reset("r2submit")
+    })
+    
+    observeEvent(input$r2submit, {
+      #click masfins to save photo/data
+      observe({
+        shinyjs::click("masfins")})
+      #move user to submission page
+      updateTabsetPanel(session, "form", selected = "Data Submission")
+    })
+    
+    observe({
+      mandatoryFilled <- vapply(flds$mandatory,
+                                function(x) {
+                                  !is.null(input[[x]]) && input[[x]] != "" && !is.null(finUP())
+                                },
+                                logical(1))
+      mandatoryFilled <- all(mandatoryFilled)
+    })
     
   }
 )

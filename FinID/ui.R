@@ -110,7 +110,11 @@ shinyUI(
                                  hr(),
                                  uiOutput("xyloc"),
                                  leafletOutput("map"),
-                                 DT::dataTableOutput("dataentry")
+                                 DT::dataTableOutput("dataentry"),
+                                 conditionalPanel("mandatoryFilled",
+                                                  actionButton("masfins", "Mas Fins?", class="btn-primary"),
+                                                  actionButton("r2submit", "Ready To Submit?", class="btn-primary")
+                                 )
                                 )
               )
     ),
