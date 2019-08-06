@@ -57,6 +57,8 @@ shinyServer(
       return(!is.null(finUP()))
     })
     outputOptions(output, 'finuploaded', suspendWhenHidden=F)
+    
+    output$dataentry <- DT::renderDataTable(formData())
 
     output$siteOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY SITE"), "assigned as: ", tags$span(style="color:red", input$site.phid)))
     output$dateOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY DATE"), "assigned as: ", tags$span(style="color:red", as.Date(input$date.phid, format = "%m-%d-%Y"))))
@@ -75,6 +77,55 @@ shinyServer(
         "form",
         selected = "Fin Photo Entry"
         )}
-    )            
+    )
+    
+    ##### Data Making Here, for table and storage ####
+    formData <- reactive({
+      if(is.null(finUP)){
+        return(NULL)
+      }else{
+        data <- c(refID = "UNMATCHED",
+                  name = "NONE_YET",
+                  match.sugg = as.character(input$match.sugg), 
+                  time.obs = as.character(input$time),
+                  PhotoID = as.character(phid$val),
+                  site = toupper(as.character(input$site.phid)), 
+                  date = as.character(input$date.phid), 
+                  sighting = as.character(input$sighting.phid),
+                  sex = as.character(input$sex),
+                  size = as.character(round(input$size/0.5)*0.5),
+                  tag.exists = as.character(input$tag.exists),
+                  tag.deployed = as.character(input$tagdeployed),
+                  tag.id = as.character(input$tag.id),
+                  tag.side = as.character(input$tag.side),
+                  biopsy = as.character(input$biopsy),
+                  biopsy.id = as.character(input$biopsy.id),
+                  notes = as.character(input$notes),
+                  tagging.notes = as.character(input$tag.notes),
+                  user = as.character(input$user),
+                  lat.approx = as.character(round(as.numeric(phid$lat), 4)),
+                  long.approx = as.character(round(as.numeric(phid$long), 4)),
+                  timestamp = epochTime(), 
+                  dfN = file.path(paste0("CCA_GWS_PHID_", phid$val, "_",as.integer(Sys.time()),".csv")),
+                  #pFn = file.path(dropfin, paste0(phid$val, ".", tools::file_ext(input$fin.photo$datapath))),
+                  survey.vessel = as.character(input$vessel),
+                  survey.crew = as.character(paste(input$crew, collapse = "|")),
+                  survey.effortON = as.character(input$effort[1]), #w/ slider range
+                  survey.effortOFF = as.character(input$effort[2]),
+                  survey.notes = as.character(input$survey.notes)
+                )
+        data <- t(data)
+        data
+      }
+    })
+    
   }
 )
+
+
+
+
+
+
+
+

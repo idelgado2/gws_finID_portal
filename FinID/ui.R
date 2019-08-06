@@ -109,7 +109,8 @@ shinyUI(
                                  imageOutput(outputId = "FinShot", width = "auto", height="auto"),
                                  hr(),
                                  uiOutput("xyloc"),
-                                 leafletOutput("map")
+                                 leafletOutput("map"),
+                                 DT::dataTableOutput("dataentry")
                                 )
               )
     ),

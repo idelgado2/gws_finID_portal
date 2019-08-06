@@ -29,3 +29,9 @@ labelMandatory <- function(label) {
     span("*", class = "mandatory_star")
   )
 }
+
+epochTime <- function(){
+  as.integer(Sys.time())
+}
+
+
