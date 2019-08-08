@@ -32,6 +32,8 @@ shinyServer(
             addProviderTiles(providers$Stamen.TonerLite, options = providerTileOptions(noWrap=T)) %>%
             setView(lng=ctr[1,1], lat = ctr[1,2], zoom = 14)
           }else{
+            phid$lat <- as.numeric(input$lat)
+            phid$long <- as.numeric(input$long)
             leaflet() %>% 
             addProviderTiles(providers$Stamen.TonerLite, options = providerTileOptions(noWrap=T)) %>%
             setView(lng=input$long, lat = input$lat, zoom = 14) %>%
