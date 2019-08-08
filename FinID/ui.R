@@ -84,17 +84,11 @@ shinyUI(
                   textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", width = "600px"),
                   selectInput("tag.exists", "Tagged Already?", choices = c("U", "Y"), selected = "U"),
                   selectInput("tagdeployed", "New Tag?", choices = c("None", "PAT", "Acoustic", "Stomach", "Clamp"), selected = "None"),
-                  conditionalPanel(
-                    condition = "input.tagdeployed != 'None'",
-                    radioButtons("tag.side", "Deployed On? ", choices = c("NA", "L", "R"), inline = T),
-                    textInput("tag.id", "Tag ID#"),
-                    textInput("tag.notes", "Tagging Notes", width = '600px', placeholder = "e.g., programming params, Ptt/SPOT used, orientation"),
-                    selectInput("biopsy", "Biopsy?", choices = c("N", "Y"), selected="N"),
-                    conditionalPanel(
-                      condition = "input.biospy != 'N'",
-                      textInput("biopsy.id", "Vial Number?")
-                    )
-                  )
+                  radioButtons("tag.side", "Deployed On? ", choices = c("NA", "L", "R"), inline = T),
+                  textInput("tag.id", "Tag ID#"),
+                  textInput("tag.notes", "Tagging Notes", width = '600px', placeholder = "e.g., programming params, Ptt/SPOT used, orientation"),
+                  selectInput("biopsy", "Biopsy?", choices = c("N", "Y"), selected="N"),
+                  textInput("biopsy.id", "Vial Number?")
                 )
               ),
               mainPanel(
@@ -109,6 +103,8 @@ shinyUI(
                                  imageOutput(outputId = "FinShot", width = "auto", height="auto"),
                                  hr(),
                                  uiOutput("xyloc"),
+                                 textInput("lat", labelMandatory("Latitude"), placeholder = "36.618149"),
+                                 textInput("long", labelMandatory("Longitude"), placeholder = "-121.901939"),
                                  leafletOutput("map"),
                                  DT::dataTableOutput("dataentry"),
                                  conditionalPanel("mandatoryFilled",
