@@ -8,8 +8,8 @@ library(leaflet)
 library(leaflet.extras)
 library(tidyverse)
 #library(shinyalert)
-finPhotoPath <- "/Users/isaacdelgado/Desktop/Testing/Photos/"  #"/home/ubuntu/Dropbox/FinID_curator2/FinPhotos/"
-finCSVPath <-   "/Users/isaacdelgado/Desktop/Testing/CSVs/"  #"/home/ubuntu/Dropbox/FinID_curator2/FinCSVs/"
+finPhotoPath <- "/home/ubuntu/Dropbox/FinID_curator2/FinPhotos/" #"/Users/isaacdelgado/Desktop/Testing/Photos/"  
+finCSVPath <- "/home/ubuntu/Dropbox/FinID_curator2/FinCSVs/"  #"/Users/isaacdelgado/Desktop/Testing/CSVs/"
 
 #list of observers available to checkbox
 flds <- list(

@@ -102,7 +102,6 @@ shinyUI(
                                  textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", width = "600px"),
                                  imageOutput(outputId = "FinShot", width = "auto", height="auto"),
                                  hr(),
-                                 uiOutput("xyloc"),
                                  textInput("lat", labelMandatory("Latitude"), placeholder = "36.618149"),
                                  textInput("long", labelMandatory("Longitude"), placeholder = "-121.901939"),
                                  leafletOutput("map"),

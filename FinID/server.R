@@ -27,11 +27,12 @@ shinyServer(
         
         ctr <- flds$coords[[input$site.phid]]
         output$map <- renderLeaflet({
-          if(is.null(input$lat) && is.null(input$long)){ ###why is it not coming into this if statement???#####
+          if(input$lat =="" || input$long ==""){ ###why is it not coming into this if statement???#####
             leaflet() %>% 
             addProviderTiles(providers$Stamen.TonerLite, options = providerTileOptions(noWrap=T)) %>%
             setView(lng=ctr[1,1], lat = ctr[1,2], zoom = 14)
-          }else{
+          }
+          else{
             phid$lat <- as.numeric(input$lat)
             phid$long <- as.numeric(input$long)
             leaflet() %>% 
@@ -41,6 +42,17 @@ shinyServer(
           }
           
         })
+        
+        #observeEvent(input$long,{
+        #    output$map <- renderLeaflet({
+        #      phid$lat <- as.numeric(input$lat)
+        #      phid$long <- as.numeric(input$long)
+        #      leaflet() %>% 
+        #      addProviderTiles(providers$Stamen.TonerLite, options = providerTileOptions(noWrap=T)) %>%
+        #      setView(lng=input$long, lat = input$lat, zoom = 14) %>%
+        #      addPulseMarkers(data = click, lng=as.numeric(input$long), lat=as.numeric(input$lat), icon = makePulseIcon(), options = leaflet::markerOptions(draggable = F))
+        #    })
+        #})
         
         observeEvent(input$map_click,{
           #capture click
