@@ -17,13 +17,13 @@ shinyServer(
       else{
         phid$site <- input$site.phid
         phid$date <- input$date.phid
-        phid$val <- paste0(toupper(input$site.phid),
-                             format(input$date.phid, "%y%m%d"),
+        phid$val <- paste0(toupper(input$site.phid), "_",
+                             format(input$date.phid, "%y%m%d"), "_",
                              ifelse(nchar(input$sighting.phid==1),
                                     paste0("0", input$sighting.phid),
                                     input$sighting.phid))
         output$FinShot <- renderImage({list(src = input$fin.photo$datapath)}, deleteFile = FALSE)
-        output$PhotoID = renderUI(tags$p(tags$span(style="color:red", "PHOTO ID"), "assigned as: ", tags$span(style="color:red", phid$dummy)))
+        output$PhotoID = renderUI(tags$p(tags$span(style="color:red", "PHOTO ID"), "assigned as: ", tags$span(style="color:red", phid$val)))
         
         ctr <- flds$coords[[input$site.phid]]
         output$map <- renderLeaflet({
@@ -127,41 +127,27 @@ shinyServer(
                        closeButton = F, type = "message", duration=9,
                        id = "datUP")
       saveData(data)
-      
       savePhoto(input$fin.photo, phid$val)
       
-      
-      
-      
-      #savePhoto()
-      
-      #savePhoto2(input$fin.photo, phid$val)
-      #showNotification(paste(phid$val, "photo uploaded to", dropfin), 
-                       #action = a(href="javascript:location.reload();", "Reload page"), 
-                       #closeButton = F, type = "message", duration=9,
-                       #id = "phidUP")
-      
       #reset fields
-      #sapply(c("sighting", "sex", "size", "tag.exists", "tagdeployed", "tag.id",
-               #"tag.side", "biopsy", "biopsy.id", "notes", "tag.notes",
-               #"fin.photo", "PhotoID", "finuploaded", "match.sugg", "time", "FinShot"), 
-             #reset)
-      #output$FinShot <<- NULL
-      #output$dataentry <<- NULL
-      #output$PhotoID <<- NULL
-      #phid$val <<- NULL
+      sapply(c("sighting", "sex", "size", "tag.exists", "tagdeployed", "tag.id",
+               "tag.side", "biopsy", "biopsy.id", "notes", "tag.notes",
+               "fin.photo", "PhotoID", "finuploaded", "match.sugg", "time", "FinShot"), 
+             reset)
+      output$FinShot <<- NULL
+      output$dataentry <<- NULL
+      output$PhotoID <<- NULL
+      phid$val <<- NULL
       
-      #reset("data")
-      #reset("masfins")
-      #reset("r2submit")
+      reset("data")
+      reset("masfins")
+      reset("r2submit")
     })
     
     observeEvent(input$r2submit, {
-      #click masfins to save photo/data
       observe({
-        shinyjs::click("masfins")})
-      #move user to submission page
-      updateTabsetPanel(session, "form", selected = "Data Submission")
+        shinyjs::click("masfins")})      #click masfins to save photo/data
+      updateTabsetPanel(session, "form", selected = "Data Submission")      #move user to submission page
     })
     
     observe({
