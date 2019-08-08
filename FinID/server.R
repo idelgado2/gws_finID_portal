@@ -17,7 +17,7 @@ shinyServer(
       else{
         phid$site <- input$site.phid
         phid$date <- input$date.phid
-        phid$dummy <- paste0(toupper(input$site.phid),
+        phid$val <- paste0(toupper(input$site.phid),
                              format(input$date.phid, "%y%m%d"),
                              ifelse(nchar(input$sighting.phid==1),
                                     paste0("0", input$sighting.phid),
@@ -122,11 +122,18 @@ shinyServer(
     
     observeEvent(input$masfins, {
       data <- data.frame(formData(), stringsAsFactors = F)
-      showNotification(paste(data$dfN, "being uploaded to"), 
+      showNotification(paste(data$dfN, "being uploaded to server"), 
                        #action = a(href="javascript:location.reload();", "Reload page"),
                        closeButton = F, type = "message", duration=9,
                        id = "datUP")
       saveData(data)
+      
+      savePhoto(input$fin.photo, phid$val)
+      
+      
+      
+      
+      #savePhoto()
       
       #savePhoto2(input$fin.photo, phid$val)
       #showNotification(paste(phid$val, "photo uploaded to", dropfin), 

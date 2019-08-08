@@ -8,9 +8,8 @@ library(leaflet)
 library(leaflet.extras)
 library(tidyverse)
 #library(shinyalert)
-
-finPhotoPath <- "/home/ubuntu/Dropbox/FinID_curator2/FinPhotos"
-finCSVPath <- "/Users/isaacdelgado/Desktop"  #"/home/ubuntu/Dropbox/FinID_curator2/FinCSVs"
+finPhotoPath <- "/Users/isaacdelgado/Desktop/Testing/Photos/"  #"/home/ubuntu/Dropbox/FinID_curator2/FinPhotos/"
+finCSVPath <-   "/Users/isaacdelgado/Desktop/Testing/CSVs/"  #"/home/ubuntu/Dropbox/FinID_curator2/FinCSVs/"
 
 #list of observers available to checkbox
 flds <- list(
@@ -38,21 +37,25 @@ epochTime <- function(){
 }
 
 saveData <- function(dat){
-  #fileName <- sprintf("here_lies_data.csv")
-  # write.table(x = dat, file=file.path(dd, fN),
-  #             row.names = F, quote = T, append=T, sep = ",")
   dat <- as.data.frame(dat)
-  if(file.exists(paste0(finCSVPath,"/test.csv"))){
+  if(file.exists(paste0(finCSVPath,"test.csv"))){
     #append if file exists
     write.table(x = dat, file=paste0(finCSVPath,"/test.csv"),
                 row.names = F, col.names = F,
                 quote = T, append=T, sep = ",")
-    # file.create(file.path(dd, 'igothere.csv'))
   }else{
     #write csv if file doesn't
     write.table(dat, file=paste0(finCSVPath,"/test.csv"),
                 row.names = F, col.names = T,
                 quote = T, append=F, sep = ",")
+  }
+}
+
+savePhoto <- function(photo, photo_id){
+  if(is.null(photo)){
+    return()
+  }else{
+    file.copy(from = photo$datapath, to = paste0(finPhotoPath,photo_id,".", tools::file_ext(photo$datapath)))
   }
 }
 
