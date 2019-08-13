@@ -98,6 +98,7 @@ shinyServer(
     )
     
     ##### Data Making Here, for table and storage ####
+    
     formData <- reactive({
       if(is.null(finUP)){
         return(NULL)
@@ -186,22 +187,23 @@ shinyServer(
     DTedit::dtedit(input, output,
                    name = 'mycontacts',
                    thedata = mydata,
-                  edit.cols = c("refID", "name", "match.sugg", "time.obs", "PhotoID", "site", "date", "sighting",
-                                "sex", "size", "tag.exists", "tag.deployed", "tag.id", "tag.side", "biopsy", "biopsy.id",
-                                "notes", "tagging.notes", "user", "lat.approx", "long.approx", "timestamp", "dfN", "survey.vessel",
-                                "survey.crew", "survey.effortON", "survey.effortOFF", "survey.notes"),
-                   edit.label.cols = c("refID", "name", "match.sugg", "time.obs", "PhotoID", "site", "date", "sighting",
-                                       "sex", "size", "tag.exists", "tag.deployed", "tag.id", "tag.side", "biopsy", "biopsy.id",
-                                       "notes", "tagging.notes", "user", "lat.approx", "long.approx", "timestamp", "dfN", "survey.vessel",
-                                       "survey.crew", "survey.effortON", "survey.effortOFF", "survey.notes"),
+                  edit.cols = c('refID', 'name', 'match.sugg', 'time.obs', 'PhotoID', 'site', 'date', 'sighting',
+                                'sex', 'size', 'tag.exists', 'tag.deployed', 'tag.id', 'tag.side', 'biopsy', 'biopsy.id',
+                                'notes', 'tagging.notes', 'user', 'lat.approx', 'long.approx', 'timestamp', 'dfN', 'survey.vessel',
+                                'survey.crew', 'survey.effortON', 'survey.effortOFF', 'survey.notes'),
+                   edit.label.cols = c('refID', 'name', 'match.sugg', 'time.obs', 'PhotoID', 'site', 'date', 'sighting',
+                                       'sex', 'size', 'tag.exists', 'tag.deployed', 'tag.id', 'tag.side', 'biopsy', 'biopsy.id',
+                                       'notes', 'tagging.notes', 'user', 'lat.approx', 'long.approx', 'timestamp', 'dfN', 'survey.vessel',
+                                       'survey.crew', 'survey.effortON', 'survey.effortOFF', 'survey.notes'),
                   input.types = c(notes='notes'),
-                   view.cols = c("refID", "name", "match.sugg", "time.obs", "PhotoID", "site", "date", "sighting",
-                                 "sex", "size", "tag.exists", "tag.deployed", "tag.id", "tag.side", "biopsy", "biopsy.id",
-                                 "notes", "tagging.notes", "user", "lat.approx", "long.approx", "timestamp", "dfN", "survey.vessel",
-                                 "survey.crew", "survey.effortON", "survey.effortOFF", "survey.notes"),
+                   view.cols = c('refID', 'name', 'match.sugg', 'time.obs', 'PhotoID', 'site', 'date', 'sighting',
+                                 'sex', 'size', 'tag.exists', 'tag.deployed', 'tag.id', 'tag.side', 'biopsy', 'biopsy.id',
+                                 'notes', 'tagging.notes', 'user', 'lat.approx', 'long.approx', 'timestamp', 'dfN', 'survey.vessel',
+                                 'survey.crew', 'survey.effortON', 'survey.effortOFF', 'survey.notes',
                   callback.update = my.update.callback,
                    callback.insert = my.insert.callback,
                    callback.delete = my.delete.callback)
+    )
   }
 )
 
