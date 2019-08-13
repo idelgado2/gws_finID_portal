@@ -70,7 +70,7 @@ shinyUI(
               inlineCSS(appCSS),
               sidebarPanel(
                 radioButtons("user", "User", choices = flds$observers, inline = T, selected=character(0)),
-                numericInput("sighting.phid", labelMandatory("Sighting #"), value = NULL, min = 01, max = 99, step =1),
+                numericInput("sighting.phid", labelMandatory("Sighting #"), value = 01, min = 01, max = 99, step =1),
                 hr(),
                 fileInput("fin.photo", labelMandatory("Upload fin here"), multiple = F, 
                             accept=c("image/jpeg", "image/png", "image/tiff",".jpeg", ".jpg", ".png", ".tiff")),
@@ -105,7 +105,7 @@ shinyUI(
                                  textInput("lat", labelMandatory("Latitude"), placeholder = "36.618149"),
                                  textInput("long", labelMandatory("Longitude"), placeholder = "-121.901939"),
                                  leafletOutput("map"),
-                                 DT::dataTableOutput("dataentry"),
+                                 dataTableOutput("dataentry"),
                                  conditionalPanel("mandatoryFilled",
                                                   actionButton("masfins", "Mas Fins?", class="btn-primary"),
                                                   actionButton("r2submit", "Ready To Submit?", class="btn-primary")
@@ -117,8 +117,9 @@ shinyUI(
     ##DATA SUBMISSION##
     ###################
     tabPanel("Data Submission",
-              sidebarPanel(),
-              mainPanel()
+             fluidPage(
+               dataTableOutput("finishTable")
+             )
     )
   )
 )

@@ -43,32 +43,25 @@ shinyServer(
           
         })
         
-        #observeEvent(input$long,{
-        #    output$map <- renderLeaflet({
-        #      phid$lat <- as.numeric(input$lat)
-        #      phid$long <- as.numeric(input$long)
-        #      leaflet() %>% 
-        #      addProviderTiles(providers$Stamen.TonerLite, options = providerTileOptions(noWrap=T)) %>%
-        #      setView(lng=input$long, lat = input$lat, zoom = 14) %>%
-        #      addPulseMarkers(data = click, lng=as.numeric(input$long), lat=as.numeric(input$lat), icon = makePulseIcon(), options = leaflet::markerOptions(draggable = F))
-        #    })
-        #})
+        output$dataentry <- renderDataTable(formData())
         
         observeEvent(input$map_click,{
           #capture click
           click <- input$map_click
           phid$lat <- click$lat
           phid$long <- click$lng
-          #print("pos is", clat, clong)
           #add to map
           leafletProxy('map') %>%
             clearMarkers() %>% 
             addPulseMarkers(data = click, lng=~lng, lat=~lat, icon = makePulseIcon(), 
                             options = leaflet::markerOptions(draggable = F))
-          #MIGHT NOT UPDATE LOC?? make draggable false
-          
-          output$xyloc <- renderText({paste("lat: ", round(click$lat, 4),
-                                            "| long: ", round(click$lng, 4))})
+
+          output$xyloc <- renderText({paste("lat: ",
+                                            round(click$lat, 4),
+                                            "| long: ",
+                                            round(click$lng, 4)
+                                            )
+                                      })
           updateTextInput(session, "lat", value = round(click$lat, 4))
           updateTextInput(session, "long", value = round(click$lng, 4))
         })
@@ -81,8 +74,8 @@ shinyServer(
     })
     outputOptions(output, 'finuploaded', suspendWhenHidden=F)
     
-    output$dataentry <- DT::renderDataTable(formData())
-
+    #output$dataentry <- renderDataTable(formData())
+    
     output$siteOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY SITE"), "assigned as: ", tags$span(style="color:red", input$site.phid)))
     output$dateOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY DATE"), "assigned as: ", tags$span(style="color:red", as.Date(input$date.phid, format = "%m-%d-%Y"))))
     
@@ -153,24 +146,29 @@ shinyServer(
       savePhoto(input$fin.photo, phid$val)
       
       #reset fields
-      sapply(c("sighting", "sex", "size", "tag.exists", "tagdeployed", "tag.id",
-               "tag.side", "biopsy", "biopsy.id", "notes", "tag.notes",
-               "fin.photo", "PhotoID", "finuploaded", "match.sugg", "time", "FinShot"), 
-             reset)
-      output$FinShot <<- NULL
-      output$dataentry <<- NULL
-      output$PhotoID <<- NULL
-      phid$val <<- NULL
+      sapply(c("sex", "size", "tag.exists", "tagdeployed", "tag.id","tag.side",
+               "biopsy", "biopsy.id", "notes", "tag.notes","finuploaded", "fin.photo", "PhotoID", "match.sugg", "time", "FinShot"), reset)
       
-      reset("data")
-      reset("masfins")
-      reset("r2submit")
+      updateNumericInput(session, "sighting.phid", value = (input$sighting.phid + 1))
+      runjs("window.scrollTo(0, 50)")   #scroll to top of the window after reseting everything
+      
+
+      output$FinShot <- NULL
+      output$dataentry <- NULL
+      output$PhotoID <- NULL
+      phid$val <- NULL
+      
+      
+      
+      #reset("data")
+      #reset("masfins")
     })
     
     observeEvent(input$r2submit, {
       observe({
         shinyjs::click("masfins")})      #click masfins to save photo/data
       updateTabsetPanel(session, "form", selected = "Data Submission")      #move user to submission page
+      output$finishTable <- renderTable({read.csv(paste0(finCSVPath,"/test.csv"))})
     })
     
     observe({

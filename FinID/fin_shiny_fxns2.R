@@ -8,8 +8,14 @@ library(leaflet)
 library(leaflet.extras)
 library(tidyverse)
 #library(shinyalert)
-finPhotoPath <- "/home/ubuntu/Dropbox/FinID_curator2/FinPhotos/" #"/Users/isaacdelgado/Desktop/Testing/Photos/"  
-finCSVPath <- "/home/ubuntu/Dropbox/FinID_curator2/FinCSVs/"  #"/Users/isaacdelgado/Desktop/Testing/CSVs/"
+
+#These paths are for the server, uncomment when uploading to server!!!!!
+#finPhotoPath <- "/home/ubuntu/Dropbox/FinID_curator2/FinPhotos/"
+#finCSVPath <- "/home/ubuntu/Dropbox/FinID_curator2/FinCSVs/"
+
+#These paths are for local testing
+finPhotoPath <- "/Users/isaacdelgado/Desktop/Testing/Photos/"  
+finCSVPath <- "/Users/isaacdelgado/Desktop/Testing/CSVs/"
 
 #list of observers available to checkbox
 flds <- list(
@@ -40,12 +46,12 @@ saveData <- function(dat){
   dat <- as.data.frame(dat)
   if(file.exists(paste0(finCSVPath,"test.csv"))){
     #append if file exists
-    write.table(x = dat, file=paste0(finCSVPath,"/test.csv"),
+    write.table(x = dat, file=paste0(finCSVPath,"test.csv"),
                 row.names = F, col.names = F,
                 quote = T, append=T, sep = ",")
   }else{
     #write csv if file doesn't
-    write.table(dat, file=paste0(finCSVPath,"/test.csv"),
+    write.table(dat, file=paste0(finCSVPath,"test.csv"),
                 row.names = F, col.names = T,
                 quote = T, append=F, sep = ",")
   }
@@ -54,7 +60,12 @@ saveData <- function(dat){
 savePhoto <- function(photo, photo_id){
   if(is.null(photo)){
     return()
-  }else{
+  }else if(file.exists(paste0(finPhotoPath,photo_id,".", tools::file_ext(photo$datapath)))){
+    showNotification(paste(data$dfN, "Photo ID already exist!"), 
+                     closeButton = F, type = "message", duration=4,
+                     id = "PhotoExist") 
+  }
+  else{
     file.copy(from = photo$datapath, to = paste0(finPhotoPath,photo_id,".", tools::file_ext(photo$datapath)))
   }
 }
