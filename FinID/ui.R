@@ -118,7 +118,7 @@ shinyUI(
     ###################
     tabPanel("Data Submission",
              fluidPage(
-               dataTableOutput("finishTable")
+               tableOutput("finishTable")
              )
     )
   )

@@ -61,7 +61,7 @@ savePhoto <- function(photo, photo_id){
   if(is.null(photo)){
     return()
   }else if(file.exists(paste0(finPhotoPath,photo_id,".", tools::file_ext(photo$datapath)))){
-    showNotification(paste(data$dfN, "Photo ID already exist!"), 
+    showNotification(paste("Photo ID already exist!"), 
                      closeButton = F, type = "message", duration=4,
                      id = "PhotoExist") 
   }

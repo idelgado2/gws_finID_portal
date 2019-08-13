@@ -9,7 +9,9 @@ shinyServer(
     #               secret='itTB3/LHML67EOMxXkJkrqOLhD+L7w58wvaoqXvW')
     
     phid <- reactiveValues()
-
+    
+    output$finishTable <- renderTable({read.csv(paste0(finCSVPath,"test.csv"))})
+    
     finUP <- reactive({
       if(is.null(input$fin.photo)){
         return(NULL)
@@ -168,7 +170,6 @@ shinyServer(
       observe({
         shinyjs::click("masfins")})      #click masfins to save photo/data
       updateTabsetPanel(session, "form", selected = "Data Submission")      #move user to submission page
-      output$finishTable <- renderTable({read.csv(paste0(finCSVPath,"/test.csv"))})
     })
     
     observe({
