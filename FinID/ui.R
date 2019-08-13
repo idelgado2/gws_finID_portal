@@ -118,7 +118,8 @@ shinyUI(
     ###################
     tabPanel("Data Submission",
              fluidPage(
-               tableOutput("finishTable")
+               dataTableOutput("finishTable")
+               #uiOutput('mycontacts')
              )
     )
   )

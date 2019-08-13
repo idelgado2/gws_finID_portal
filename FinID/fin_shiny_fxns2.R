@@ -7,6 +7,7 @@ require(rdrop2)
 library(leaflet)
 library(leaflet.extras)
 library(tidyverse)
+library(DTedit)
 #library(shinyalert)
 
 #These paths are for the server, uncomment when uploading to server!!!!!
@@ -68,5 +69,20 @@ savePhoto <- function(photo, photo_id){
   else{
     file.copy(from = photo$datapath, to = paste0(finPhotoPath,photo_id,".", tools::file_ext(photo$datapath)))
   }
+}
+
+my.insert.callback <- function(data, row) {
+  mydata <- rbind(data, mydata)
+  return(mydata)
+}
+
+my.update.callback <- function(data, olddata, row) {
+  mydata[row,] <- data[1,]
+  return(mydata)
+}
+
+my.delete.callback <- function(data, row) {
+  mydata[row,] <- NULL
+  return(mydata)
 }
 

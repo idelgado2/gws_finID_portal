@@ -10,7 +10,7 @@ shinyServer(
     
     phid <- reactiveValues()
     
-    output$finishTable <- renderTable({read.csv(paste0(finCSVPath,"test.csv"))})
+    output$finishTable <- renderDataTable({read.csv(paste0(finCSVPath,"test.csv"))})
     
     finUP <- reactive({
       if(is.null(input$fin.photo)){
@@ -181,6 +181,27 @@ shinyServer(
       mandatoryFilled <- all(mandatoryFilled)
     })
     
+    mydata <- read.csv(file=paste0(finCSVPath,"test.csv"), header=TRUE, sep=",")
+    
+    DTedit::dtedit(input, output,
+                   name = 'mycontacts',
+                   thedata = mydata,
+                  edit.cols = c("refID", "name", "match.sugg", "time.obs", "PhotoID", "site", "date", "sighting",
+                                "sex", "size", "tag.exists", "tag.deployed", "tag.id", "tag.side", "biopsy", "biopsy.id",
+                                "notes", "tagging.notes", "user", "lat.approx", "long.approx", "timestamp", "dfN", "survey.vessel",
+                                "survey.crew", "survey.effortON", "survey.effortOFF", "survey.notes"),
+                   edit.label.cols = c("refID", "name", "match.sugg", "time.obs", "PhotoID", "site", "date", "sighting",
+                                       "sex", "size", "tag.exists", "tag.deployed", "tag.id", "tag.side", "biopsy", "biopsy.id",
+                                       "notes", "tagging.notes", "user", "lat.approx", "long.approx", "timestamp", "dfN", "survey.vessel",
+                                       "survey.crew", "survey.effortON", "survey.effortOFF", "survey.notes"),
+                  input.types = c(notes='notes'),
+                   view.cols = c("refID", "name", "match.sugg", "time.obs", "PhotoID", "site", "date", "sighting",
+                                 "sex", "size", "tag.exists", "tag.deployed", "tag.id", "tag.side", "biopsy", "biopsy.id",
+                                 "notes", "tagging.notes", "user", "lat.approx", "long.approx", "timestamp", "dfN", "survey.vessel",
+                                 "survey.crew", "survey.effortON", "survey.effortOFF", "survey.notes"),
+                  callback.update = my.update.callback,
+                   callback.insert = my.insert.callback,
+                   callback.delete = my.delete.callback)
   }
 )
 
