@@ -500,7 +500,6 @@ server = function(input, output, session) {
     #move user to submission page
     updateTabsetPanel(session, "form", selected = "Data Submission")
     
-    
   })
   
   ##actions once data can be stored
