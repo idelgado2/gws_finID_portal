@@ -108,7 +108,7 @@ shinyUI(
                                  dataTableOutput("dataentry"),
                                  conditionalPanel("mandatoryFilled",
                                                   actionButton("masfins", "Mas Fins?", class="btn-primary"),
-                                                  actionButton("r2submit", "Ready To Submit?", class="btn-primary")
+                                                  actionButton("r2submit", "Review Fins", class="btn-primary")
                                  )
                                 )
               )
@@ -118,7 +118,8 @@ shinyUI(
     ###################
     tabPanel("Data Submission",
              fluidPage(
-               #dataTableOutput("finishTable")
+               actionButton("serverSubmit", "Submit To Server", class="btn-primary"),
+               hr(),
                uiOutput('final_Table')
              )
     )

@@ -142,7 +142,7 @@ shinyServer(
       data <- data.frame(formData(), stringsAsFactors = F)
       showNotification(paste(data$dfN, "being uploaded to server"), 
                        #action = a(href="javascript:location.reload();", "Reload page"),
-                       closeButton = F, type = "message", duration=9,
+                       closeButton = F, type = "message", duration=2,
                        id = "datUP")
       saveData(data)
       savePhoto(input$fin.photo, phid$val)
@@ -180,6 +180,17 @@ shinyServer(
                                 },
                                 logical(1))
       mandatoryFilled <- all(mandatoryFilled)
+    })
+    
+    observeEvent(input$serverSubmit,{
+      write.table(x = mydata, file=paste0(finCSVPath,"testedit.csv"),
+                row.names = F, col.names = F,
+                quote = T, append=T, sep = ",")
+      
+      showNotification(paste("Uploading to Server"), 
+                       closeButton = F, type = "message", duration=2,
+                       id = "datUP")
+      
     })
     
     
