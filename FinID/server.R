@@ -208,7 +208,6 @@ shinyServer(
                                  'notes', 'tagging.notes', 'user', 'lat.approx', 'long.approx', 'timestamp', 'dfN', 'survey.vessel',
                                  'survey.crew', 'survey.effortON', 'survey.effortOFF'),
                    callback.update = my.update.callback,
-                   callback.insert = my.insert.callback,
                    callback.delete = my.delete.callback
                   )
   }

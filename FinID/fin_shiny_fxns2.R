@@ -71,18 +71,13 @@ savePhoto <- function(photo, photo_id){
   }
 }
 
-my.insert.callback <- function(data, row) {
-  mydata <- rbind(data, mydata)
-  return(mydata)
-}
-
 my.update.callback <- function(data, olddata, row) {
-  mydata[row,] <- data[1,]
+  mydata <<- data
   return(mydata)
 }
 
 my.delete.callback <- function(data, row) {
-  mydata[row,] <- NULL
+  mydata <<- data[-row,]
   return(mydata)
 }
 
