@@ -9,7 +9,6 @@ shinyServer(
     #               secret='itTB3/LHML67EOMxXkJkrqOLhD+L7w58wvaoqXvW')
     
     phid <- reactiveValues()
-    
     output$finishTable <- renderDataTable({read.csv(paste0(finCSVPath,"test.csv"))})
     
     finUP <- reactive({
@@ -170,6 +169,7 @@ shinyServer(
     observeEvent(input$r2submit, {
       observe({
         shinyjs::click("masfins")})      #click masfins to save photo/data
+      mydata <- read.csv(file=paste0(finCSVPath,"test.csv"), header=TRUE, sep=",", stringsAsFactors = FALSE) #this is called to load the data table in the Data Submission page
       updateTabsetPanel(session, "form", selected = "Data Submission")      #move user to submission page
     })
     
@@ -182,28 +182,35 @@ shinyServer(
       mandatoryFilled <- all(mandatoryFilled)
     })
     
-    mydata <- read.csv(file=paste0(finCSVPath,"test.csv"), header=TRUE, sep=",")
+    
+    mydata <- read.csv(file=paste0(finCSVPath,"test.csv"), header=TRUE, sep=",", stringsAsFactors = FALSE) #this is called to load the data table in the Data Submission page
+    
     
     DTedit::dtedit(input, output,
-                   name = 'mycontacts',
+                   name = 'final_Table',
                    thedata = mydata,
+                   show.copy = FALSE,
+                   show.insert = FALSE,
                   edit.cols = c('refID', 'name', 'match.sugg', 'time.obs', 'PhotoID', 'site', 'date', 'sighting',
                                 'sex', 'size', 'tag.exists', 'tag.deployed', 'tag.id', 'tag.side', 'biopsy', 'biopsy.id',
                                 'notes', 'tagging.notes', 'user', 'lat.approx', 'long.approx', 'timestamp', 'dfN', 'survey.vessel',
-                                'survey.crew', 'survey.effortON', 'survey.effortOFF', 'survey.notes'),
+                                'survey.crew', 'survey.effortON', 'survey.effortOFF'),
                    edit.label.cols = c('refID', 'name', 'match.sugg', 'time.obs', 'PhotoID', 'site', 'date', 'sighting',
                                        'sex', 'size', 'tag.exists', 'tag.deployed', 'tag.id', 'tag.side', 'biopsy', 'biopsy.id',
                                        'notes', 'tagging.notes', 'user', 'lat.approx', 'long.approx', 'timestamp', 'dfN', 'survey.vessel',
-                                       'survey.crew', 'survey.effortON', 'survey.effortOFF', 'survey.notes'),
-                  input.types = c(notes='notes'),
+                                       'survey.crew', 'survey.effortON', 'survey.effortOFF'),
+                   input.types = c(refID='textInput', name='textInput', match.sugg='textInput', time.obs='textInput', PhotoID='textInput', site='textInput', date='textInput', sighting='textInput',
+                                  sex='textInput', size='textInput', tag.exists='textInput', tag.deployed='textInput', tag.id='textInput', tag.side='textInput', biopsy='textInput', biopsy.id='textInput',
+                                  notes='textInput', tagging.notes='textInput', user='textInput', lat.approx='textInput', long.approx='textInput', timestamp='textInput', dfN='textInput', survey.vessel='textInput',
+                                  survey.crew='textInput', survey.effortON='textInput', survey.effortOFF='textInput'),
                    view.cols = c('refID', 'name', 'match.sugg', 'time.obs', 'PhotoID', 'site', 'date', 'sighting',
                                  'sex', 'size', 'tag.exists', 'tag.deployed', 'tag.id', 'tag.side', 'biopsy', 'biopsy.id',
                                  'notes', 'tagging.notes', 'user', 'lat.approx', 'long.approx', 'timestamp', 'dfN', 'survey.vessel',
-                                 'survey.crew', 'survey.effortON', 'survey.effortOFF', 'survey.notes',
-                  callback.update = my.update.callback,
+                                 'survey.crew', 'survey.effortON', 'survey.effortOFF'),
+                   callback.update = my.update.callback,
                    callback.insert = my.insert.callback,
-                   callback.delete = my.delete.callback)
-    )
+                   callback.delete = my.delete.callback
+                  )
   }
 )
 
