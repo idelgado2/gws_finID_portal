@@ -95,7 +95,6 @@ shinyUI(
                 useShinyjs(),
                 uiOutput("siteOutput.phid"),
                 uiOutput("dateOutput.phid"),
-                textOutput("path"),
                 uiOutput("PhotoID"),
                 hr(),
                 conditionalPanel("output.finuploaded",
@@ -118,6 +117,7 @@ shinyUI(
     ###################
     tabPanel("Data Submission",
              fluidPage(
+               useShinyalert(),
                actionButton("serverSubmit", "Submit To Server", class="btn-primary"),
                hr(),
                rHandsontableOutput("hotTable")

@@ -171,7 +171,11 @@ shinyServer(
       mydata <- read.csv(file=paste0(finCSVPath,"test.csv"), header=TRUE, sep=",", stringsAsFactors = FALSE, row.names = NULL) #this is called to load the data table in the Data Submission page
       Sys.sleep(1)  #forcing program to sleep for a second in order to let test csv file to be created and identified in time to render the table
       output$hotTable <- renderRHandsontable({
-        rhandsontable(mydata) # converts the R dataframe to rhandsontable object
+        rhandsontable(mydata) %>%  # converts the R dataframe to rhandsontable object
+          hot_col("PhotoID", readOnly = TRUE) %>%
+          hot_col("site", readOnly = TRUE) %>%
+          hot_col("date", readOnly = TRUE) %>%
+          hot_col("sighting", readOnly = TRUE)
       })
       updateTabsetPanel(session, "form", selected = "Data Submission")      #move user to submission page
     })
@@ -193,6 +197,10 @@ shinyServer(
                        closeButton = F, type = "message", duration=2,
                        id = "datUP")
       file.remove(paste0(finCSVPath,"test.csv"))
+      shinyalert::shinyalert(title = "Uploading To Server", text = "", type = "info", closeOnEsc = FALSE,
+                             closeOnClickOutside = FALSE, html = FALSE, showCancelButton = FALSE,
+                             showConfirmButton = FALSE, timer = 3000,
+                             animation = TRUE)
       updateTabsetPanel(session, "form", selected = "Survey Info")
     })
     
