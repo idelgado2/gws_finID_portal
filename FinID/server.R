@@ -4,25 +4,23 @@ library(shiny)
 source("fin_shiny_fxns2.R")
 shinyServer(
   function(input, output, session){
-    #setAccountInfo(name='idelgado',
-    #               token='B911B9733B6FCF8B67DCA5BF861A1AD9',
-    #               secret='itTB3/LHML67EOMxXkJkrqOLhD+L7w58wvaoqXvW')
     
     phid <- reactiveValues()
-    output$finishTable <- renderDataTable({read.csv(paste0(finCSVPath,"test.csv"))})
-    
+    output$finishTable <- renderDataTable({read.csv(paste0(finCSVPath,"test.csv"), row.names = NULL)})
+
+    #finUp function to generate and assign all relevant values of the the finID once the Photo has been uploaded
     finUP <- reactive({
-      if(is.null(input$fin.photo)){
+      if(is.null(input$fin.photo)){ #if there is no photo uploaded do not assign values yet
         return(NULL)
       }
       else{
         phid$site <- input$site.phid
         phid$date <- input$date.phid
-        phid$val <- paste0(toupper(input$site.phid),
+        phid$val <- paste0(toupper(input$site.phid),  #Val is the PhotoID
                              format(input$date.phid, "%y%m%d"),
                              ifelse(nchar(input$sighting.phid==1),
                                     paste0("0", input$sighting.phid),
-                                    input$sighting.phid))
+                                    input$sighting.phid))     
         output$FinShot <- renderImage({list(src = input$fin.photo$datapath)}, deleteFile = FALSE)
         output$PhotoID = renderUI(tags$p(tags$span(style="color:red", "PHOTO ID"), "assigned as: ", tags$span(style="color:red", phid$val)))
         
@@ -73,7 +71,7 @@ shinyServer(
       #hide the data entry tbl until essential info is included
       return(!is.null(finUP()))
     })
-    outputOptions(output, 'finuploaded', suspendWhenHidden=F)
+    outputOptions(output, 'finuploaded', suspendWhenHidden=FALSE)
     
     #output$dataentry <- renderDataTable(formData())
     
@@ -136,8 +134,11 @@ shinyServer(
         data
       }
     })
-################################################################################################
-    
+
+    #########################
+    ## OBSERVE EVENTS HERE ##
+    #########################
+
     observeEvent(input$masfins, {
       data <- data.frame(formData(), stringsAsFactors = F)
       showNotification(paste(data$dfN, "being uploaded to server"), 
@@ -161,15 +162,17 @@ shinyServer(
       phid$val <- NULL
       
       
-      
       #reset("data")
       #reset("masfins")
     })
     
     observeEvent(input$r2submit, {
-      observe({
-        shinyjs::click("masfins")})      #click masfins to save photo/data
-      mydata <- read.csv(file=paste0(finCSVPath,"test.csv"), header=TRUE, sep=",", stringsAsFactors = FALSE) #this is called to load the data table in the Data Submission page
+      #observe({shinyjs::click("masfins")})      #click masfins to save photo/data
+      mydata <- read.csv(file=paste0(finCSVPath,"test.csv"), header=TRUE, sep=",", stringsAsFactors = FALSE, row.names = NULL) #this is called to load the data table in the Data Submission page
+      Sys.sleep(1)  #forcing program to sleep for a second in order to let test csv file to be created and identified in time to render the table
+      output$hotTable <- renderRHandsontable({
+        rhandsontable(mydata) # converts the R dataframe to rhandsontable object
+      })
       updateTabsetPanel(session, "form", selected = "Data Submission")      #move user to submission page
     })
     
@@ -183,44 +186,15 @@ shinyServer(
     })
     
     observeEvent(input$serverSubmit,{
-      write.table(x = mydata, file=paste0(finCSVPath,"testedit.csv"),
-                row.names = F, col.names = F,
-                quote = T, append=T, sep = ",")
+      write.table(hot_to_r(input$hotTable), file = paste0(finCSVPath, as.character(Sys.time())),
+                  row.names = FALSE, col.names = TRUE, quote = TRUE, append=FALSE, sep = ",")
       
       showNotification(paste("Uploading to Server"), 
                        closeButton = F, type = "message", duration=2,
                        id = "datUP")
-      
+      file.remove(paste0(finCSVPath,"test.csv"))
     })
     
-    
-    mydata <- read.csv(file=paste0(finCSVPath,"test.csv"), header=TRUE, sep=",", stringsAsFactors = FALSE) #this is called to load the data table in the Data Submission page
-    
-    
-    DTedit::dtedit(input, output,
-                   name = 'final_Table',
-                   thedata = mydata,
-                   show.copy = FALSE,
-                   show.insert = FALSE,
-                  edit.cols = c('refID', 'name', 'match.sugg', 'time.obs', 'PhotoID', 'site', 'date', 'sighting',
-                                'sex', 'size', 'tag.exists', 'tag.deployed', 'tag.id', 'tag.side', 'biopsy', 'biopsy.id',
-                                'notes', 'tagging.notes', 'user', 'lat.approx', 'long.approx', 'timestamp', 'dfN', 'survey.vessel',
-                                'survey.crew', 'survey.effortON', 'survey.effortOFF'),
-                   edit.label.cols = c('refID', 'name', 'match.sugg', 'time.obs', 'PhotoID', 'site', 'date', 'sighting',
-                                       'sex', 'size', 'tag.exists', 'tag.deployed', 'tag.id', 'tag.side', 'biopsy', 'biopsy.id',
-                                       'notes', 'tagging.notes', 'user', 'lat.approx', 'long.approx', 'timestamp', 'dfN', 'survey.vessel',
-                                       'survey.crew', 'survey.effortON', 'survey.effortOFF'),
-                   input.types = c(refID='textInput', name='textInput', match.sugg='textInput', time.obs='textInput', PhotoID='textInput', site='textInput', date='textInput', sighting='textInput',
-                                  sex='textInput', size='textInput', tag.exists='textInput', tag.deployed='textInput', tag.id='textInput', tag.side='textInput', biopsy='textInput', biopsy.id='textInput',
-                                  notes='textInput', tagging.notes='textInput', user='textInput', lat.approx='textInput', long.approx='textInput', timestamp='textInput', dfN='textInput', survey.vessel='textInput',
-                                  survey.crew='textInput', survey.effortON='textInput', survey.effortOFF='textInput'),
-                   view.cols = c('refID', 'name', 'match.sugg', 'time.obs', 'PhotoID', 'site', 'date', 'sighting',
-                                 'sex', 'size', 'tag.exists', 'tag.deployed', 'tag.id', 'tag.side', 'biopsy', 'biopsy.id',
-                                 'notes', 'tagging.notes', 'user', 'lat.approx', 'long.approx', 'timestamp', 'dfN', 'survey.vessel',
-                                 'survey.crew', 'survey.effortON', 'survey.effortOFF'),
-                   callback.update = my.update.callback,
-                   callback.delete = my.delete.callback
-                  )
   }
 )
 

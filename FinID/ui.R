@@ -58,7 +58,6 @@ shinyUI(
                   "Ready to add Fins?",
                   class="btn-primary"
                 ),
-                #### TESTING HTML HERE ####
                 textOutput("site.phid"),
                 textOutput("date.phid")
               )
@@ -81,7 +80,7 @@ shinyUI(
                 hr(),
                 conditionalPanel(
                   condition = "output.finuploaded",
-                  textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", width = "600px"),
+                  textInput("notes", "Notes", placeholder = "e.g. pings heard, secondary marks, scars, nicknames, etc", value = "Notes", width = "600px"),
                   selectInput("tag.exists", "Tagged Already?", choices = c("U", "Y"), selected = "U"),
                   selectInput("tagdeployed", "New Tag?", choices = c("None", "PAT", "Acoustic", "Stomach", "Clamp"), selected = "None"),
                   radioButtons("tag.side", "Deployed On? ", choices = c("NA", "L", "R"), inline = T),
@@ -107,7 +106,7 @@ shinyUI(
                                  leafletOutput("map"),
                                  dataTableOutput("dataentry"),
                                  conditionalPanel("mandatoryFilled",
-                                                  actionButton("masfins", "Mas Fins?", class="btn-primary"),
+                                                  actionButton("masfins", "Mas Fins?/Add Fin", class="btn-primary"),
                                                   actionButton("r2submit", "Review Fins", class="btn-primary")
                                  )
                                 )
@@ -120,8 +119,8 @@ shinyUI(
              fluidPage(
                actionButton("serverSubmit", "Submit To Server", class="btn-primary"),
                hr(),
-               uiOutput('final_Table')
-             )
+               rHandsontableOutput("hotTable")
+            )
     )
   )
 )
