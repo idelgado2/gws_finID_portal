@@ -35,7 +35,7 @@ shinyUI(
                 textInput(
                   "vessel",
                   "Vessel",
-                  placeholder = "MBA Skiff? Norcal? R/V BS?"
+                  placeholder = "MBA Skiff? Norcal? R/V BS?", value = "Vessel"
                 )
               ),
               mainPanel(
@@ -50,7 +50,8 @@ shinyUI(
                   "notes.survey",
                   "Notes from survey day",
                   placeholder = "breaches? predations?",
-                  width = "100%"
+                  width = "100%",
+                  value = "Notes"
                 ),
                 textOutput("crew"),
                 actionButton(
@@ -73,10 +74,10 @@ shinyUI(
                 hr(),
                 fileInput("fin.photo", labelMandatory("Upload fin here"), multiple = F, 
                             accept=c("image/jpeg", "image/png", "image/tiff",".jpeg", ".jpg", ".png", ".tiff")),
-                textInput("time", labelMandatory("Time of Observation"), placeholder = "24HR CLOCK PLS (e.g., 0915 for 9:15)"),
+                textInput("time", labelMandatory("Time of Observation"), placeholder = "24HR CLOCK PLS (e.g., 0915 for 9:15)", value = "0000"),
                 hr(),
                 selectInput("sex", labelMandatory("Sex (U if unknown)"), choices = c("M", "F", "U"), selectize = F, selected = "U"), 
-                numericInput("size", labelMandatory("Size (in ft)"), value = NULL, min = 4, max = 20, step = 0.5),
+                numericInput("size", labelMandatory("Size (in ft)"), value = 0, min = 4, max = 20, step = 0.5),
                 hr(),
                 conditionalPanel(
                   condition = "output.finuploaded",
@@ -84,10 +85,10 @@ shinyUI(
                   selectInput("tag.exists", "Tagged Already?", choices = c("U", "Y"), selected = "U"),
                   selectInput("tagdeployed", "New Tag?", choices = c("None", "PAT", "Acoustic", "Stomach", "Clamp"), selected = "None"),
                   radioButtons("tag.side", "Deployed On? ", choices = c("NA", "L", "R"), inline = T),
-                  textInput("tag.id", "Tag ID#"),
-                  textInput("tag.notes", "Tagging Notes", width = '600px', placeholder = "e.g., programming params, Ptt/SPOT used, orientation"),
+                  textInput("tag.id", "Tag ID#", value = "TagID"),
+                  textInput("tag.notes", "Tagging Notes", width = '600px', placeholder = "e.g., programming params, Ptt/SPOT used, orientation", value = "Notes"),
                   selectInput("biopsy", "Biopsy?", choices = c("N", "Y"), selected="N"),
-                  textInput("biopsy.id", "Vial Number?")
+                  textInput("biopsy.id", "Vial Number?", value = "VialNum")
                 )
               ),
               mainPanel(
@@ -98,7 +99,7 @@ shinyUI(
                 uiOutput("PhotoID"),
                 hr(),
                 conditionalPanel("output.finuploaded",
-                                 textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", width = "600px"),
+                                 textInput("match.sugg", "Suggestions to the MatchMaker?", placeholder = "Zat you, Burnsey?", width = "600px", value = "suggestion"),
                                  imageOutput(outputId = "FinShot", width = "auto", height="auto"),
                                  hr(),
                                  textInput("lat", labelMandatory("Latitude"), placeholder = "36.618149"),
