@@ -167,7 +167,6 @@ shinyServer(
     })
     
     observeEvent(input$r2submit, {
-      #observe({shinyjs::click("masfins")})      #click masfins to save photo/data
       mydata <- read.csv(file=paste0(finCSVPath,"test.csv"), header=TRUE, sep=",", stringsAsFactors = FALSE, row.names = NULL) #this is called to load the data table in the Data Submission page
       Sys.sleep(1)  #forcing program to sleep for a second in order to let test csv file to be created and identified in time to render the table
       output$hotTable <- renderRHandsontable({
