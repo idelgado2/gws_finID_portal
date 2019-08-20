@@ -186,7 +186,7 @@ shinyServer(
     })
     
     observeEvent(input$serverSubmit,{
-      write.table(hot_to_r(input$hotTable), file = paste0(finCSVPath, as.character(Sys.time())),
+      write.table(hot_to_r(input$hotTable), file = paste0(finCSVPath, paste0(as.character(Sys.time()),"_FinID.csv")),
                   row.names = FALSE, col.names = TRUE, quote = TRUE, append=FALSE, sep = ",")
       
       showNotification(paste("Uploading to Server"), 
