@@ -175,7 +175,8 @@ shinyServer(
           hot_col("PhotoID", readOnly = TRUE) %>%
           hot_col("site", readOnly = TRUE) %>%
           hot_col("date", readOnly = TRUE) %>%
-          hot_col("sighting", readOnly = TRUE)
+          hot_col("sighting", readOnly = TRUE) %>%
+          hot_context_menu(allowRowEdit = TRUE, allowColEdit = FALSE)
       })
       updateTabsetPanel(session, "form", selected = "Data Submission")      #move user to submission page
     })
