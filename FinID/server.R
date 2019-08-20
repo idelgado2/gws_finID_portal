@@ -193,6 +193,7 @@ shinyServer(
                        closeButton = F, type = "message", duration=2,
                        id = "datUP")
       file.remove(paste0(finCSVPath,"test.csv"))
+      updateTabsetPanel(session, "form", selected = "Survey Info")
     })
     
   }
