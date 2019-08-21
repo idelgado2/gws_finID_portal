@@ -5,45 +5,102 @@ source("fin_shiny_fxns2.R")
 shinyServer(
   function(input, output, session){
     
-    phid <- reactiveValues()
-    output$finishTable <- renderDataTable({read.csv(paste0(finCSVPath,"test.csv"), row.names = NULL)})
-
-    #finUp function to generate and assign all relevant values of the the finID once the Photo has been uploaded
+    ############################
+    ##     VARIABLES HERE     ##
+    ############################
+    
+    phid <- reactiveValues()  #reactive value to hold majority of user input values
+    
+    ##########################
+    ##     OUTPUTS HERE     ##
+    ##########################
+    
+    output$finishTable <- renderDataTable({read.csv(paste0(finCSVPath,"test.csv"), row.names = NULL)})  ##may not need this here, I will check right now
+    
+    ##############################################################
+    ## HIDE DATA entry table until essential infor is included ###
+    ##############################################################
+    output$finuploaded <- reactive({
+      return(!is.null(finUP()))
+    })
+    
+    ########################################################
+    ## Fin upload will continue to run even when hidden, ### 
+    ## not exactly sure why we need this but we need it  ###
+    ########################################################
+    outputOptions(output, 'finuploaded', suspendWhenHidden=FALSE)
+    
+    #######################################################################
+    ## Ouputs for chossen SURVEY SITE, SURVEY DATE, and generated FindID ##
+    #######################################################################
+    output$siteOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY SITE"), "assigned as: ", tags$span(style="color:red", input$site.phid)))
+    output$dateOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY DATE"), "assigned as: ", tags$span(style="color:red", as.Date(input$date.phid, format = "%m-%d-%Y"))))
+    output$path = renderText({
+      inFile <- input$fin.photo
+      ifelse (is.null(inFile), return(NULL), return(inFile$datapath))
+    })
+    
+    
+    #########################
+    ##   FUNCTIONS HERE   ##
+    #########################
+    
+    ####################################################################
+    ## DATA SHOWING Function called 'finUP', This will check         ###
+    ## if the a photo has been uploaded. Once a photo has been       ###
+    ## uploaded it will assign all inputed values to a               ###
+    ## reavctive values structure and will output the uploaded       ###
+    ## photo on the the screen as well as the the Photo ID givin     ###
+    ## to the photo, the leaflet map, to pinpoint location of        ###
+    ## fin photo capture and a table at the bottom summarizing       ###
+    ## the current fin photo information that will be submitted      ###
+    ## to the current session. All map functionality is included     ###
+    ## in this function, the actual map and OBSERVE EVENT associated ###
+    ## with the map when clicking.                                   ###
+    ####################################################################
     finUP <- reactive({
       if(is.null(input$fin.photo)){ #if there is no photo uploaded do not assign values yet
         return(NULL)
       }
       else{
+        #assign reactive values
         phid$site <- input$site.phid
         phid$date <- input$date.phid
-        phid$val <- paste0(toupper(input$site.phid),  #Val is the PhotoID
-                             format(input$date.phid, "%y%m%d"),
-                             ifelse(nchar(input$sighting.phid==1),
-                                    paste0("0", input$sighting.phid),
-                                    input$sighting.phid))     
-        output$FinShot <- renderImage({list(src = input$fin.photo$datapath)}, deleteFile = FALSE)
-        output$PhotoID = renderUI(tags$p(tags$span(style="color:red", "PHOTO ID"), "assigned as: ", tags$span(style="color:red", phid$val)))
+        phid$val <- paste0(toupper(input$site.phid),  #create Photo ID and assign to reactive value 'val'
+                           format(input$date.phid, "%y%m%d"),
+                           ifelse(nchar(input$sighting.phid==1),
+                                  paste0("0", input$sighting.phid),
+                                  input$sighting.phid))     
+        output$FinShot <- renderImage({list(src = input$fin.photo$datapath)}, deleteFile = FALSE) #print uploaded photo
+        output$PhotoID = renderUI(tags$p(tags$span(style="color:red", "PHOTO ID"), "assigned as: ", tags$span(style="color:red", phid$val)))  #print Photo ID
         
+        ### LEAFLET MAP FUNCTIONALITY HERE ###
         ctr <- flds$coords[[input$site.phid]]
         output$map <- renderLeaflet({
-          if(input$lat =="" || input$long ==""){ ###why is it not coming into this if statement???#####
+          if(input$lat =="" || input$long ==""){ 
             leaflet() %>% 
-            addProviderTiles(providers$Stamen.TonerLite, options = providerTileOptions(noWrap=T)) %>%
-            setView(lng=ctr[1,1], lat = ctr[1,2], zoom = 14)
+              addProviderTiles(providers$Stamen.TonerLite, options = providerTileOptions(noWrap=T)) %>%
+              setView(lng=ctr[1,1], lat = ctr[1,2], zoom = 14)
           }
           else{
             phid$lat <- as.numeric(input$lat)
             phid$long <- as.numeric(input$long)
             leaflet() %>% 
-            addProviderTiles(providers$Stamen.TonerLite, options = providerTileOptions(noWrap=T)) %>%
-            setView(lng=input$long, lat = input$lat, zoom = 14) %>%
-            addPulseMarkers(data = click, lng=as.numeric(input$long), lat=as.numeric(input$lat), icon = makePulseIcon(), options = leaflet::markerOptions(draggable = F))
+              addProviderTiles(providers$Stamen.TonerLite, options = providerTileOptions(noWrap=T)) %>%
+              setView(lng=input$long, lat = input$lat, zoom = 14) %>%
+              addPulseMarkers(data = click, lng=as.numeric(input$long), lat=as.numeric(input$lat), icon = makePulseIcon(), options = leaflet::markerOptions(draggable = F))
           }
           
         })
         
-        output$dataentry <- renderDataTable(formData())
+        output$dataentry <- renderDataTable(formData()) #print preview table to current information to view befor submitting to current session
         
+        #########################################
+        ## OBSERVER EVENT FOR MAP CLICK HERE, ###
+        ## within the same function, I don't  ###
+        ## know if we can move it out of this ###
+        ## function, but this works here      ###
+        #########################################
         observeEvent(input$map_click,{
           #capture click
           click <- input$map_click
@@ -54,48 +111,25 @@ shinyServer(
             clearMarkers() %>% 
             addPulseMarkers(data = click, lng=~lng, lat=~lat, icon = makePulseIcon(), 
                             options = leaflet::markerOptions(draggable = F))
-
+          
           output$xyloc <- renderText({paste("lat: ",
                                             round(click$lat, 4),
                                             "| long: ",
                                             round(click$lng, 4)
-                                            )
-                                      })
-          updateTextInput(session, "lat", value = round(click$lat, 4))
+          )
+          })
+          updateTextInput(session, "lat", value = round(click$lat, 4))  #update coordinates in input boxes depending on map click
           updateTextInput(session, "long", value = round(click$lng, 4))
         })
       }
     })
     
-    output$finuploaded <- reactive({
-      #hide the data entry tbl until essential info is included
-      return(!is.null(finUP()))
-    })
-    outputOptions(output, 'finuploaded', suspendWhenHidden=FALSE)
     
-    #output$dataentry <- renderDataTable(formData())
-    
-    output$siteOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY SITE"), "assigned as: ", tags$span(style="color:red", input$site.phid)))
-    output$dateOutput.phid = renderUI(tags$p(tags$span(style="color:red", "SURVEY DATE"), "assigned as: ", tags$span(style="color:red", as.Date(input$date.phid, format = "%m-%d-%Y"))))
-    
-    output$path = renderText({
-      inFile <- input$fin.photo
-      ifelse (is.null(inFile), return(NULL), return(inFile$datapath))
-    })
-    
-
-    ##### action instruction for addFins button #####
-    observeEvent(
-      input$addfins,
-        {updateTabsetPanel(
-        session = session,
-        "form",
-        selected = "Fin Photo Entry"
-        )}
-    )
-    
-    ##### Data Making Here, for table and storage ####
-    
+    #################################################
+    ## DATA MAKING function 'formData', this will ###
+    ## take all the inputed values and put        ###
+    ## them into a data.frame called 'data'       ###
+    #################################################
     formData <- reactive({
       if(is.null(finUP)){
         return(NULL)
@@ -135,24 +169,50 @@ shinyServer(
       }
     })
 
+    
+    
     #########################
     ## OBSERVE EVENTS HERE ##
     #########################
 
+    
+    ################################################
+    ## OBSERVE EVENT for 'addFins' button      #####
+    ## in SURVEY INFO Tab this will push the   #####
+    ## user to the 'FIN ID ENTRY' Tab          #####
+    ################################################
+    observeEvent(
+      input$addfins,
+      {updateTabsetPanel(
+        session = session,
+        "form",
+        selected = "Fin Photo Entry"
+      )}
+    )
+    
+    
+    ##################################################################
+    ## OBSERVE EVENT for 'masfins' button in FIN ID ENTRY Tab,     ###
+    ## this will take the data.frame 'data' and pass it to         ### 
+    ## saveData() function as well as the photo uploaded to        ### 
+    ## savePhoto() function. These functions are located in        ### 
+    ## file fin_shiny_fxns2.R and this will save the the data      ###
+    ## to a temporary csv file and the photo to a separate folder. ### 
+    ## The paths can be changed at the top of fin_shiny_fxns2.R    ###
+    ##################################################################
     observeEvent(input$masfins, {
-      data <- data.frame(formData(), stringsAsFactors = F)
+      data <- data.frame(formData(), stringsAsFactors = F)    #save data to a dataframe in local varibale to pass to functions
       showNotification(paste(data$dfN, "being uploaded to server"), 
-                       #action = a(href="javascript:location.reload();", "Reload page"),
                        closeButton = F, type = "message", duration=2,
                        id = "datUP")
-      saveData(data)
-      savePhoto(input$fin.photo, phid$val)
+      saveData(data)  #save data
+      savePhoto(input$fin.photo, phid$val)  #save photo
       
       #reset fields
       sapply(c("sex", "size", "tag.exists", "tagdeployed", "tag.id","tag.side",
                "biopsy", "biopsy.id", "notes", "tag.notes","finuploaded", "fin.photo", "PhotoID", "match.sugg", "time", "FinShot"), reset)
       
-      updateNumericInput(session, "sighting.phid", value = (input$sighting.phid + 1))
+      updateNumericInput(session, "sighting.phid", value = (input$sighting.phid + 1))   #increase sigting by one everytime we want to add another fin entry
       runjs("window.scrollTo(0, 50)")   #scroll to top of the window after reseting everything
       
 
@@ -166,6 +226,14 @@ shinyServer(
       #reset("masfins")
     })
     
+    ####################################################################
+    ## OBSERVE EVENT for 'r2submit' (review to submit) button in     ###
+    ## FIN ID ENTRY Tab, this will read the temporary csv file       ###
+    ## created by 'masfins' button into a data.frame called 'mydata' ###
+    ## and then render an editable table (handsontable) in the       ### 
+    ## DATA SUBMISSION tab. This even will also push the user to the ###
+    ## DATA SUBMISSION tab as well.                                  ###
+    ####################################################################
     observeEvent(input$r2submit, {
       mydata <- read.csv(file=paste0(finCSVPath,"test.csv"), header=TRUE, sep=",", stringsAsFactors = FALSE, row.names = NULL) #this is called to load the data table in the Data Submission page
       Sys.sleep(1)  #forcing program to sleep for a second in order to let test csv file to be created and identified in time to render the table
@@ -180,6 +248,32 @@ shinyServer(
       updateTabsetPanel(session, "form", selected = "Data Submission")      #move user to submission page
     })
     
+    #############################################################################
+    ## OBSERVE EVENT for 'serverSubmit' button in DATA SUBMISSION Tab,        ###
+    ## this will write to a new permenant CSV file using the newly            ###
+    ## created table. We use the table here instead of the previous           ###
+    ## data.frame because the user may edit the information in the table.     ###
+    ## This event will also delete the temporary csv file previously created. ###
+    ## Lastly, this will push the user to the SURVEY INFO tab to start over.  ###
+    #############################################################################
+    observeEvent(input$serverSubmit,{
+      write.table(hot_to_r(input$hotTable), file = paste0(finCSVPath, paste0(as.character(Sys.time()),"_FinID.csv")),
+                  row.names = FALSE, col.names = TRUE, quote = TRUE, append=FALSE, sep = ",")   # write table to new csv file
+
+      file.remove(paste0(finCSVPath,"test.csv"))    #delete temporary filed
+      shinyalert::shinyalert(title = "Uploading To Server", text = "", type = "success", closeOnEsc = FALSE,
+                             closeOnClickOutside = FALSE, html = FALSE, showCancelButton = FALSE,
+                             showConfirmButton = FALSE, timer = 3000,
+                             animation = TRUE)    #notification to user
+      updateTabsetPanel(session, "form", selected = "Survey Info")  #move to initial tab
+    })
+    
+    ########################################################################
+    ## OBSERVER for insuring that all mandatory items are filled in.     ###
+    ## This may need to be revisioned, all fields are now filled in by   ###
+    ## default to ensure editability in the table in DATA SUBMISSION tab ###
+    ## Thus, this observer may not be necessary at this point            ###
+    ########################################################################
     observe({
       mandatoryFilled <- vapply(flds$mandatory,
                                 function(x) {
@@ -188,22 +282,6 @@ shinyServer(
                                 logical(1))
       mandatoryFilled <- all(mandatoryFilled)
     })
-    
-    observeEvent(input$serverSubmit,{
-      write.table(hot_to_r(input$hotTable), file = paste0(finCSVPath, paste0(as.character(Sys.time()),"_FinID.csv")),
-                  row.names = FALSE, col.names = TRUE, quote = TRUE, append=FALSE, sep = ",")
-      
-      showNotification(paste("Uploading to Server"), 
-                       closeButton = F, type = "message", duration=2,
-                       id = "datUP")
-      file.remove(paste0(finCSVPath,"test.csv"))
-      shinyalert::shinyalert(title = "Uploading To Server", text = "", type = "info", closeOnEsc = FALSE,
-                             closeOnClickOutside = FALSE, html = FALSE, showCancelButton = FALSE,
-                             showConfirmButton = FALSE, timer = 3000,
-                             animation = TRUE)
-      updateTabsetPanel(session, "form", selected = "Survey Info")
-    })
-    
   }
 )
 
