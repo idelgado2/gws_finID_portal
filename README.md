@@ -19,9 +19,9 @@ App development focused on a three panel workflow to streamline entry of survey 
 
 * standardization & cross-referencing of photoID labels for consistent formating and avoid duplicates/errors;
 * set of mandatory fields necessary for entering data;
-* dynamic leaflet map for click-friendly estimation of sighting's GPS location;
+* dynamic leaflet map for click-friendly estimation of sighting's GPS location, with associated latitude and longitude input boxes;
 * auto-populating tables for quick visual checks of data entry;
-* data review stage that is independent of data entry & auto-populates a review table based on the survey's date, location, and the data previously staged with that metadata.  
+* data review stage that auto-populates a review table based on the survey's date, location, and the data previously staged with that metadata. This review table is editable and will finalize the data that will be saved to the AWS server 
 
 ## Survey Info
 The app starts by collecting data on the survey's location, date, crew, vessel, effort, and any notes or observations from that day. Since this info is central to the organizing observations and autopopulates photoID fields for sightings, data entry should focus on entering surveys individually.  Any data pertaining to the entire survey should be entered in this panel
@@ -33,7 +33,7 @@ In the below example, I am entering data for a SEFI survey on 2018 October 21, n
 ## Fin Photo Entry
 Individual fin photos and shark sighting data are entered in the "Fin Photo Entry" panel, which begins rather blank until adequate data is entered to submit an observation.  For observations to be admitted to the portal, the user must supply a photo, location/date/sighting number for a unique photoID, and a sex/size estimation (n.b.: unknown can be entered in these fields).  
 
-Note that no buttons ("mas fins" or "ready to submit") appear until the fin photo and essential photoID data are supplied.  Also note the red astericks indicating a all mandatory fields for observations. The list of mandatory fields can be managed within the function library.  
+Note that no buttons ("mas fins/Add fins" or "ready to submit") appear until the fin photo and essential photoID data are supplied.  Also note the red astericks indicating a all mandatory fields for observations. The list of mandatory fields can be managed within the function library.  
 
 ![*A blank entry page is displayed until a photo is uploaded and a unique photoID is created from the location, date, sighting number fields.](photo_readme/photo_finEntry_blank.png)
 
@@ -41,22 +41,19 @@ When enough data is supplied to create a unique photoID, the uploaded photo is r
 
 ![*The portal renders an uploaded photo & red text describing photoID creation, indicating enough data has been supplied to create a unique photoID & the remaining data entry can be completed.*](photo_readme/photo_finEntry_fin.png)
 
-The remaining data can be entered once a photo & unique photoID are created.  In the left column, users can provide notes, any tags detected or observed on the animal, and if any new tags were deployed on the animal.  In the case of new deployments, additional data is requested for the side deployed on, tagID number, notes about the tag's programming/package set up, and if a biopsy was taken and stored in a vial.  In the center, the leaflet map estimates lat/lon based on the user's click where the shark was sighted.  At the bottom is a quickly referenced table to visually check how the data will appear w/in the database. 
+The remaining data can be entered once a photo & unique photoID are created.  In the left column, users can provide notes, any tags detected or observed on the animal, and if any new tags were deployed on the animal.  In the case of new deployments, additional data is requested for the side deployed on, tagID number, notes about the tag's programming/package set up, and if a biopsy was taken and stored in a vial.  In the center, the leaflet map estimates lat/lon based on the user's click where the shark was sighted along with input boxes right above the map. The GPS locatoin can be updated using the input boxes and/or through map clicking.  At the bottom is a quickly referenced table to visually check how the data will appear w/in the database. 
 ![*Remaining data is supplied in the bottom of the page, after adequate data is supplied to create a photoID for an uploaded fin photo*](photo_readme/photo_finEntry_data.png)
 
 ## Data Submission
-The final panel allows the user to ensure data accuracy and completeness before submitting the observations to the database. The user can select all staged files associated with a survey date/location, which are then downloaded & used to populate the table for error checking.  The table initially populates with sightings from the same date/location being entered previously (but user can easily click to submit observations from another day).  
-
-Note importantly no submission button appears until the user checks "I HAVE VERIFIED THE DATA". 
+The final panel allows the user to ensure data accuracy and completeness before submitting the observations to the database. There will be an editable table allowing the user to fix any errors except for any columns associated with the Photo ID. These read-only columns include 'PhotoID', 'Site', 'Sightings', and 'Datae'. If one of these are incorrect the user can simply delete the row by LEFT-Clicking on the highlighted row and select 'Delete Row', the user can then go back to Fin ID Entry and re-input the fin before submitting to the server. Once the user submits to the server they will be taken to begining in which they can begin a new survey sit entry. **PLEASE SEE BUGS SECTION.
 
 ![*Visual checks should confirm accurate data for all fields and all sightings.  Dropdown menu above allows user to select, review, and submit data that has already been staged from other surveys.*](photo_readme/photo_dbSubmit.png)
+ 
 
-When the user manually clicks "I HAVE VERIFIED THE DATA", the submission button appears and will allow the user to migrate data from the staging area and the database.  
-
-This stage will require additional development to support the full needs of database integration.  In particular, new development should priortize an editing feature for the table, either through directly editable cells or checkboxes for entry deletion (and then repeat entry).  Furthermore, database integration must be supported for migrating data from staged areas into the formal database.  Finally, this panel can also be used to support matching processes.  
+This stage will require additional development to support the full needs of database integration. Database integration must be supported for migrating data from staged areas into the formal database.  Finally, this panel can also be used to support matching processes with Zagami and Machine Learning techniques.  
 
 ### Software Needs and Dependencies
-The app was developed iteratively to maintain full functionality (at one stage) and develop new features (in the next version).  App5.R and App6.R are nearly interchangeable.  App6 began development of update messages & naming conflicts, but is otherwise functionally equivalent to app5.R
+The app was developed iteratively to maintain full functionality (at one stage) and develop new features (in the next version).  App5.R and App6.R are nearly interchangeable.  App6 began development of update messages & naming conflicts, but is otherwise functionally equivalent to app5.R. Further development was started in the new folder 'FinID', this is the newest version and the one currently being used. In this folder you will find the the ui.R and server.R for the shiny app as well as the support script fin_shiny_fxns2.R.
 
 The app critically depends both on two resources.  First, a function library is stored inside the top-level directory for support in the shiny processing, directory pathways and database management, and metadata standards (e.g., site codes/locs, users, mandatory fields, etc.)  
 
