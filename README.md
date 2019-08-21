@@ -49,8 +49,9 @@ The final panel allows the user to ensure data accuracy and completeness before 
 
 ![*Visual checks should confirm accurate data for all fields and all sightings.  Dropdown menu above allows user to select, review, and submit data that has already been staged from other surveys.*](photo_readme/photo_dbSubmit.png)
  
- (photo_readme/photo_finEntry_EditCell.png)
- (photo_readme/photo_finEntry_EditRow.png)
+ ![*Visual checks should confirm accurate data for all fields and all sightings.  Dropdown menu above allows user to select, review, and submit data that has already been staged from other surveys.*](photo_readme/photo_finEntry_EditCell.png)
+ 
+ ![*Visual checks should confirm accurate data for all fields and all sightings.  Dropdown menu above allows user to select, review, and submit data that has already been staged from other surveys.*](photo_readme/photo_finEntry_EditRow.png)
 
 This stage will require additional development to support the full needs of database integration. Database integration must be supported for migrating data from staged areas into the formal database.  Finally, this panel can also be used to support matching processes with Zagami and Machine Learning techniques.  
 
