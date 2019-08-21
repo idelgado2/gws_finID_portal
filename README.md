@@ -45,10 +45,12 @@ The remaining data can be entered once a photo & unique photoID are created.  In
 ![*Remaining data is supplied in the bottom of the page, after adequate data is supplied to create a photoID for an uploaded fin photo*](photo_readme/photo_finEntry_data.png)
 
 ## Data Submission
-The final panel allows the user to ensure data accuracy and completeness before submitting the observations to the database. There will be an editable table allowing the user to fix any errors except for any columns associated with the Photo ID. These read-only columns include 'PhotoID', 'Site', 'Sightings', and 'Datae'. If one of these are incorrect the user can simply delete the row by LEFT-Clicking on the highlighted row and select 'Delete Row', the user can then go back to Fin ID Entry and re-input the fin before submitting to the server. Once the user submits to the server they will be taken to begining in which they can begin a new survey sit entry. **PLEASE SEE SOFTWARE NEED**.
+The final panel allows the user to ensure data accuracy and completeness before submitting the observations to the database. There will be an editable table allowing the user to fix any errors except for any columns associated with the Photo ID. These read-only columns include 'PhotoID', 'site', 'sightings', and 'date'. If one of these are incorrect the user can simply delete the row by LEFT-Clicking on the highlighted row and select 'Delete Row', the user can then go back to Fin ID Entry and re-input the fin before submitting to the server. Once the user submits to the server they will be taken to begining in which they can begin a new survey sit entry. **PLEASE SEE SOFTWARE NEEDS**.
 
 ![*Visual checks should confirm accurate data for all fields and all sightings.  Dropdown menu above allows user to select, review, and submit data that has already been staged from other surveys.*](photo_readme/photo_dbSubmit.png)
  
+ (photo_readme/photo_finEntry_EditCell.png)
+ (photo_readme/photo_finEntry_EditRow.png)
 
 This stage will require additional development to support the full needs of database integration. Database integration must be supported for migrating data from staged areas into the formal database.  Finally, this panel can also be used to support matching processes with Zagami and Machine Learning techniques.  
 
