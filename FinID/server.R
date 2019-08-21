@@ -5,15 +5,15 @@ source("fin_shiny_fxns2.R")
 shinyServer(
   function(input, output, session){
     
-    ############################
+    ##~~~~~~~~~~~~~~~~~~~~~~~~##
     ##     VARIABLES HERE     ##
-    ############################
+    ##~~~~~~~~~~~~~~~~~~~~~~~~##
     
     phid <- reactiveValues()  #reactive value to hold majority of user input values
     
-    ##########################
+    ##~~~~~~~~~~~~~~~~~~~~~~##
     ##     OUTPUTS HERE     ##
-    ##########################
+    ##~~~~~~~~~~~~~~~~~~~~~~##
     
     output$finishTable <- renderDataTable({read.csv(paste0(finCSVPath,"test.csv"), row.names = NULL)})  ##may not need this here, I will check right now
     
@@ -41,9 +41,9 @@ shinyServer(
     })
     
     
-    #########################
+    ##~~~~~~~~~~~~~~~~~~~~##
     ##   FUNCTIONS HERE   ##
-    #########################
+    ##~~~~~~~~~~~~~~~~~~~~##
     
     ####################################################################
     ## DATA SHOWING Function called 'finUP', This will check         ###
@@ -171,9 +171,9 @@ shinyServer(
 
     
     
-    #########################
+    ##~~~~~~~~~~~~~~~~~~~~~##
     ## OBSERVE EVENTS HERE ##
-    #########################
+    ##~~~~~~~~~~~~~~~~~~~~~##
 
     
     ################################################
