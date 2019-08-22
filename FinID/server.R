@@ -17,6 +17,16 @@ shinyServer(
     
     output$finishTable <- renderDataTable({read.csv(paste0(finCSVPath,"test.csv"), row.names = NULL)})  ##may not need this here, I will check right now
     
+    checkTempCSV <- reactive({
+      if(!file.exists("/Users/isaacdelgado/Desktop/Testing/CSVs/test.csv")){
+        return(NULL)
+      }
+    })
+    
+    output$csvexist <- reactive({return(!is.null(checkTempCSV()))})
+    
+    outputOptions(output, 'csvexist', suspendWhenHidden=FALSE)
+    
     ##############################################################
     ## HIDE DATA entry table until essential infor is included ###
     ##############################################################
