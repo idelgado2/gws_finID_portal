@@ -11,21 +11,18 @@ shinyServer(
     
     phid <- reactiveValues()  #reactive value to hold majority of user input values
     
+    hide("reviewButton")      #hide review button to ensure it is not clicked before masfins is clicked once so that the temp csv file is created and site crash is avoided
+    
+    if(file.exists("/Users/isaacdelgado/Desktop/Testing/CSVs/test.csv")){
+      file.remove(paste0(finCSVPath,"test.csv"))
+    }
+    
     ##~~~~~~~~~~~~~~~~~~~~~~##
     ##     OUTPUTS HERE     ##
     ##~~~~~~~~~~~~~~~~~~~~~~##
     
     output$finishTable <- renderDataTable({read.csv(paste0(finCSVPath,"test.csv"), row.names = NULL)})  ##may not need this here, I will check right now
     
-    checkTempCSV <- reactive({
-      if(!file.exists("/Users/isaacdelgado/Desktop/Testing/CSVs/test.csv")){
-        return(NULL)
-      }
-    })
-    
-    output$csvexist <- reactive({return(!is.null(checkTempCSV()))})
-    
-    outputOptions(output, 'csvexist', suspendWhenHidden=FALSE)
     
     ##############################################################
     ## HIDE DATA entry table until essential infor is included ###
@@ -217,6 +214,8 @@ shinyServer(
                        id = "datUP")
       saveData(data)  #save data
       savePhoto(input$fin.photo, phid$val)  #save photo
+      
+      show("reviewButton")  #Show review button after initial masfins/addfin click is made to ensure that temp csv file is created to prevent from potential crashing
       
       #reset fields
       sapply(c("sex", "size", "tag.exists", "tagdeployed", "tag.id","tag.side",

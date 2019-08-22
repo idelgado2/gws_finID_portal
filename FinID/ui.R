@@ -107,9 +107,8 @@ shinyUI(
                                  dataTableOutput("dataentry"),
                                  conditionalPanel("mandatoryFilled",
                                                   actionButton("masfins", "Mas Fins?/Add Fin", class="btn-primary"),
-                                                  actionButton("r2submit", "Review Fins", class="btn-primary"),
-                                                  conditionalPanel("csvexist",
-                                                                   h3("Outputs calculated based on user inputs"))
+                                                  hr(),
+                                                  div(id = "reviewButton" ,actionButton("r2submit", "Review Fins", class="btn-primary"))
                                  )
                                 )
               )
