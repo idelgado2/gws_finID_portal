@@ -65,6 +65,7 @@ As of August 2019, there are three main isses that need to be resolved. First, w
 
 ### File Locations
 The shiny app is saving all csv files on ther AWS server for the Monterey Bay Aquarium in the following directory: /home/ubuntu/Dropbox/
+
 Additionally, the app is saving all photos in the neighboring folder at: /home/ubuntu/Dropbox
 
 ### Session info
