@@ -66,7 +66,7 @@ As of August 2019, there are three main isses that need to be resolved. First, w
 Summary of bugs:
 * Fin Photo in 'Fin Photo Entry' tab does not reset until new photo is uploaded. (Ignore the previous picture and upload a new fin photo or click Review Fins)
 * After submitting to the server, shiny app is not fully reset (Simply refresh the shiny app in the browser to fully reset)
-* Edits to the final table  in 'Data Submission' tab for server submitting will only be saved if no more fins are added (Save all edits till all fins have been added)
+* Edits to the final table  in 'Data Submission' tab for server submitting will only be saved if no more fins are added (Do all edits until all fins have been added)
 
 ### File Locations
 The shiny app is saving all csv files on ther AWS server for the Monterey Bay Aquarium in the following directory: /home/ubuntu/Dropbox/
