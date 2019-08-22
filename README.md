@@ -64,9 +64,9 @@ The app critically depends both on two resources.  First, a function library is 
 As of August 2019, there are three main isses that need to be resolved. First, when the user inputs a fin into the site and clicks on 'mas fins?/add fin' the site will keep the previous photo uploaded on the screen. Simply upload the new photo and the photo will change. Secondly, when the user uploads the final table to the server by clicking on 'Submit to Server', the user will be taken to the first tab to start over, however not all fields will reset leaving the previous information still there. The user can simply reload the entire site by refreshing the page and everything will be reset. Lastly, edits made to the final table for submission will only be saved if no more fins are added after the edits. Everytime you add a new fin the final table in the Data submissions tab will grab the original data.frame in the backend and will not keep the edits the user has made. I have put a warning on the data submissions page about this issue to simply do any edits at the very end after all fins have been added to ensure all edits are saved.
 
 Summary of bugs:
-* Fin Photo does not reset until new photo is uploaded. (Ignore the previous picture and simply upload a new fin photo or click Review Fins)
+* Fin Photo in 'Fin Photo Entry' tab does not reset until new photo is uploaded. (Ignore the previous picture and simply upload a new fin photo or click Review Fins)
 * After submitting to the server, shiny app is not fully reset (Simply refresh the shiny app in the browser to fully reset)
-* Edits to the final table for server submitting will only be saved if no more fins are added (Save all edits till all fins have been added)
+* Edits to the final table  in 'Data Submission' tab for server submitting will only be saved if no more fins are added (Save all edits till all fins have been added)
 
 ### File Locations
 The shiny app is saving all csv files on ther AWS server for the Monterey Bay Aquarium in the following directory: /home/ubuntu/Dropbox/
