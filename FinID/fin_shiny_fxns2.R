@@ -12,12 +12,12 @@ library(DTedit)
 library(rhandsontable)
 
 #These paths are for the server, uncomment when uploading to server!!!!!
-#finPhotoPath <- "/home/ubuntu/Dropbox/FinID_curator2/FinPhotos/"
-#finCSVPath <- "/home/ubuntu/Dropbox/FinID_curator2/FinCSVs/"
+finPhotoPath <- "/home/ubuntu/Dropbox/FinID_curator2/FinPhotos/"
+finCSVPath <- "/home/ubuntu/Dropbox/FinID_curator2/FinCSVs/"
 
 #These paths are for local testing
-finPhotoPath <- "/Users/isaacdelgado/Desktop/Testing/Photos/"  
-finCSVPath <- "/Users/isaacdelgado/Desktop/Testing/CSVs/"
+#finPhotoPath <- "/Users/isaacdelgado/Desktop/Testing/Photos/"  
+#finCSVPath <- "/Users/isaacdelgado/Desktop/Testing/CSVs/"
 
 #list of observers available to checkbox
 flds <- list(
