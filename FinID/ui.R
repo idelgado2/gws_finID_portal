@@ -120,7 +120,7 @@ shinyUI(
              fluidPage(
                useShinyalert(),
                actionButton("serverSubmit", "Submit To Server", class="btn-primary"),
-               h3("Please add all fins BEFORE editing the table, when you add a new fin all edits will be lost"),
+               h3("Please add all fins BEFORE editing the table, when you add a fin all edits will be lost"),
                hr(),
                rHandsontableOutput("hotTable")
             )

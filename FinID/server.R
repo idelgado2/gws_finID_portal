@@ -224,7 +224,6 @@ shinyServer(
       updateNumericInput(session, "sighting.phid", value = (input$sighting.phid + 1))   #increase sigting by one everytime we want to add another fin entry
       runjs("window.scrollTo(0, 50)")   #scroll to top of the window after reseting everything
       
-
       output$FinShot <- NULL
       output$dataentry <- NULL
       output$PhotoID <- NULL
