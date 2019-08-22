@@ -13,7 +13,7 @@ shinyServer(
     
     hide("reviewButton")      #hide review button to ensure it is not clicked before masfins is clicked once so that the temp csv file is created and site crash is avoided
     
-    if(file.exists("/Users/isaacdelgado/Desktop/Testing/CSVs/test.csv")){
+    if(file.exists(paste0(finCSVPath,"test.csv"))){
       file.remove(paste0(finCSVPath,"test.csv"))
     }
     
